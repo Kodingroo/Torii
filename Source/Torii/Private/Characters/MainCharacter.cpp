@@ -27,9 +27,9 @@ AMainCharacter::AMainCharacter()
 	// Configure character movement
 	GetCharacterMovement()->GravityScale = 2.0f;
 	GetCharacterMovement()->AirControl = 0.80f;
-	GetCharacterMovement()->JumpZVelocity = 1000.f;
+	GetCharacterMovement()->JumpZVelocity = 750.f;
 	GetCharacterMovement()->GroundFriction = 3.0f;
-	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
 	GetCharacterMovement()->MaxFlySpeed = 600.0f;
 
 	// Lock character motion onto the XZ plane, so the character can't move in or out of the screen
@@ -62,9 +62,13 @@ void AMainCharacter::UpdateAnimation()
 
 	// Are we moving or standing still?
 	UPaperFlipbook* DesiredAnimation = (PlayerSpeedSqr > 0.0f) ? RunningAnimation : IdleAnimation;
-	if( GetSprite()->GetFlipbook() != DesiredAnimation 	)
+	if( GetSprite()->GetFlipbook() != DesiredAnimation && !GetCharacterMovement()->IsFalling())
 	{
 		GetSprite()->SetFlipbook(DesiredAnimation);
+	}
+	else if( GetCharacterMovement()->IsFalling())
+	{
+		GetSprite()->SetFlipbook(JumpingAnimation);
 	}
 }
 

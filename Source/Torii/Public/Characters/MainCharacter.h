@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "PaperCharacter.h"
 #include "Gameplay/ToriiCamera.h"
+#include "PaperFlipbook.h"
 #include "MainCharacter.generated.h"
 
 class UTextRenderComponent;
@@ -27,11 +28,24 @@ public:
 protected:
 	// The animation to play while running around
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Animations)
-	class UPaperFlipbook* RunningAnimation;
+	UPaperFlipbook* RunningAnimation;
 
 	// The animation to play while idle (standing still)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
-	class UPaperFlipbook* IdleAnimation;
+	UPaperFlipbook* IdleAnimation;
+	
+	// The animation to play while jupmoing
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
+	UPaperFlipbook* JumpingAnimation;
+	
+	// The animation to play while landing
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
+	UPaperFlipbook* LandingAnimation;
+		
+	// The animation to play while hit
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
+	UPaperFlipbook* HitAnimation;
+	
 
 	/** Called to choose the correct animation to play based on the character's movement state */
 	void UpdateAnimation();
