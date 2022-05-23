@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "PaperCharacter.h"
+#include "Gameplay/ToriiCamera.h"
 #include "MainCharacter.generated.h"
 
 class UTextRenderComponent;
@@ -19,6 +20,9 @@ public:
 
 	UTextRenderComponent* TextComponent;
 	virtual void Tick(float DeltaSeconds) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room Camera")
+	AToriiCamera* CurrentCamera;
 	
 protected:
 	// The animation to play while running around
