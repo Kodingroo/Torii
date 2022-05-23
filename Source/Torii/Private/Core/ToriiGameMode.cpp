@@ -2,4 +2,10 @@
 
 
 #include "Core/ToriiGameMode.h"
+#include "Characters/MainCharacter.h"
+
+AToriiGameMode::AToriiGameMode()
+{
+	DefaultPawnClass = AMainCharacter::StaticClass();	
+}
 

@@ -13,5 +13,8 @@ UCLASS()
 class TORII_API AToriiGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
+
+public:
+	AToriiGameMode();
 	
 };
