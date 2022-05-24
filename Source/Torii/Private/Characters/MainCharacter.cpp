@@ -7,6 +7,7 @@
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY_STATIC(SideScrollerCharacter, Log, All);
 
@@ -55,6 +56,30 @@ AMainCharacter::AMainCharacter()
 //////////////////////////////////////////////////////////////////////////
 // Animation
 
+void AMainCharacter::Squish(float ModWidth, float ModHeight, float SquishDuration)
+{
+	if (GetCharacterMovement()->IsFalling() && !GetCharacterMovement()->GroundFriction)
+	{
+		GetSprite()->SetRelativeScale3D(FVector(StartWidth + ModWidth, 0.f, StartHeight + ModHeight));
+	}
+	else
+		{
+			GetSprite()->SetRelativeScale3D(FVector(StartWidth + ModWidth, 0.f, StartHeight + ModHeight));
+			GetWorld()->GetTimerManager().SetTimer(SquishHandle, [&]()
+			{
+				GetSprite()->SetRelativeScale3D(FVector(StartWidth, 0.f, StartHeight));
+			}, SquishDuration, false);	
+		}
+}
+
+void AMainCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	StartWidth = GetSprite()->GetRelativeScale3D().X;
+	StartHeight = GetSprite()->GetRelativeScale3D().Z;
+}
+
 void AMainCharacter::UpdateAnimation()
 {
 	const FVector PlayerVelocity = GetVelocity();
@@ -62,6 +87,7 @@ void AMainCharacter::UpdateAnimation()
 
 	// Are we moving or standing still?
 	UPaperFlipbook* DesiredAnimation = (PlayerSpeedSqr > 0.0f) ? RunningAnimation : IdleAnimation;
+	
 	if( GetSprite()->GetFlipbook() != DesiredAnimation && !GetCharacterMovement()->IsFalling())
 	{
 		GetSprite()->SetFlipbook(DesiredAnimation);
@@ -92,6 +118,20 @@ void AMainCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInpu
 
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &AMainCharacter::TouchStarted);
 	PlayerInputComponent->BindTouch(IE_Released, this, &AMainCharacter::TouchStopped);
+}
+
+void AMainCharacter::Jump()
+{
+	Super::Jump();
+	
+	Squish(-.2, .2, .2);
+}
+
+void AMainCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+	
+	Squish(.3, -.3, 0.1);
 }
 
 void AMainCharacter::MoveRight(float Value)

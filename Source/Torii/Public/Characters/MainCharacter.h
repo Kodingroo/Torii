@@ -24,8 +24,22 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room Camera")
 	AToriiCamera* CurrentCamera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Squish")
+	float StartWidth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Squish")
+	float StartHeight;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Squish")
+	bool IsMirrored;
+
+	/* Create squished animation quality for jumping */
+	void Squish(float ModWidth, float ModHeight, float SquishDuration );
+
+	FTimerHandle SquishHandle;
 	
 protected:
+	virtual void BeginPlay() override;
+	
 	// The animation to play while running around
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Animations)
 	UPaperFlipbook* RunningAnimation;
@@ -64,5 +78,9 @@ protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 	// End of APawn interface
-	
+
+	virtual void Jump() override;
+
+	virtual void Landed(const FHitResult& Hit) override;
+
 };
