@@ -10,6 +10,31 @@
 
 class UTextRenderComponent;
 
+USTRUCT()
+struct FInteractionData
+{
+	GENERATED_BODY()
+
+	FInteractionData()
+	{
+		ViewedInteractionComponent = nullptr;
+		LastInteractionCheckTime = 0.f;
+		bInteractHeld = false;
+	}
+
+	//The current interactable component we're viewing, if there is one
+	UPROPERTY()
+	class UInteractionComponent* ViewedInteractionComponent;
+
+	//The time when we last checked for an interactable
+	UPROPERTY()
+	float LastInteractionCheckTime;
+
+	//Whether the local player is holding the interact key
+	UPROPERTY()
+	bool bInteractHeld;
+
+};
 
 UCLASS(config=Game)
 class AMainCharacter : public APaperCharacter
@@ -36,6 +61,46 @@ public:
 	void Squish(float ModWidth, float ModHeight, float SquishDuration );
 
 	FTimerHandle SquishHandle;
+
+	// ---------- INTERACTION ---------- //
+	//How often in seconds to check for an interactable object. Set this to zero if you want to check every tick.
+	UPROPERTY(EditDefaultsOnly, Category = "Interaction")
+	float InteractionCheckFrequency;
+
+	//How far we'll trace when we check if the player is looking at an interactable object
+	UPROPERTY(EditDefaultsOnly, Category = "Interaction")
+	float InteractionCheckDistance;
+
+	void PerformInteractionCheck();
+
+	void CouldntFindInteractable();
+	void FoundNewInteractable(UInteractionComponent* Interactable);
+
+	void BeginInteract();
+	void EndInteract();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerBeginInteract();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerEndInteract();
+
+	void Interact();
+
+	//Information about the current state of the players interaction
+	UPROPERTY()
+	FInteractionData InteractionData;
+
+	//Helper function to make grabbing interactable faster
+	FORCEINLINE class UInteractionComponent* GetInteractable() const { return InteractionData.ViewedInteractionComponent; }
+
+	FTimerHandle TimerHandle_Interact;
+
+	//True if we're interacting with an item that has an interaction time (for example a lamp that takes 2 seconds to turn on)
+	bool IsInteracting() const;
+
+	//Get the time till we interact with the current interactable
+	float GetRemainingInteractTime() const;
 	
 protected:
 	virtual void BeginPlay() override;

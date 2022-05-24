@@ -13,5 +13,8 @@ UCLASS()
 class TORII_API APS_Platform : public APaperSpriteActor
 {
 	GENERATED_BODY()
+
+public:
+	virtual void BeginPlay() override;
 	
 };

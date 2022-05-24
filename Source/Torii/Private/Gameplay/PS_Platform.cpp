@@ -3,3 +3,8 @@
 
 #include "Gameplay/PS_Platform.h"
 
+void APS_Platform::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
