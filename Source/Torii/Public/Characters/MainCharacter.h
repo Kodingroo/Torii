@@ -163,7 +163,7 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 	// End of APawn interface
 
-	virtual void Jump() override;
+	void DoubleJump();
 
 	virtual void Landed(const FHitResult& Hit) override;
 

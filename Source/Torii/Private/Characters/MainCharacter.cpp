@@ -18,7 +18,7 @@ DEFINE_LOG_CATEGORY_STATIC(SideScrollerCharacter, Log, All);
 AMainCharacter::AMainCharacter() :
 	JumpCounter(0),
 	MaximumJumps(1),
-	JumpHeight(1500.f),
+	JumpHeight(750.f),
 	DashCounter(0),
 	DashDistance(2000.f),
 	HitObjectDirection(0.f),
@@ -133,8 +133,8 @@ void AMainCharacter::Tick(float DeltaSeconds)
 void AMainCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// Note: the 'Jump' action and the 'MoveRight' axis are bound to actual keys/buttons/sticks in DefaultInput.ini (editable from Project Settings..Input)
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AMainCharacter::DoubleJump);
+	// PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMainCharacter::MoveRight);
 
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &AMainCharacter::TouchStarted);
@@ -144,20 +144,16 @@ void AMainCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AMainCharacter::EndInteract);
 }
 
-void AMainCharacter::Jump()
+void AMainCharacter::DoubleJump()
 {
-	Super::Jump();
-	
 	Squish(-.2, .2, .2);
+
+	float JumpZ = GetCharacterMovement()->JumpZVelocity;
 
 	UE_LOG(LogTemp, Warning, TEXT("Found Wall!"));
 	if (GetCharacterMovement()->IsFalling() && IsWallSliding)
 	{
-		JumpCounter++;
-		if(JumpCounter <= MaximumJumps)
-		{
-			float JumpZ = GetCharacterMovement()->JumpZVelocity;
-			float AddedForce = -3;
+			float AddedForce = -2;
 			float OppositeFacingDirection = 0;
 			if (GetSprite()->GetForwardVector().X < 0)
 			{
@@ -170,6 +166,7 @@ void AMainCharacter::Jump()
 				LaunchCharacter(FVector(OppositeFacingDirection * AddedForce, 0.f, JumpZ), true, true);
 			}
 			
+			IsWallSliding = false;
 			// if (HitObjectDirection >= 0 && IsWallSliding)
 			// {
 
@@ -177,7 +174,6 @@ void AMainCharacter::Jump()
 				// 									 CurrentVelocity));
 
 				// LaunchCharacter(FVector(HitObjectDirection * AddedForce, 0.f, JumpZ), true, true);
-				IsWallSliding = false;
 			// }
 			// else
 			// {
@@ -188,7 +184,12 @@ void AMainCharacter::Jump()
 			// 	LaunchCharacter(FVector(HitObjectDirection * AddedForce, 0.f, -JumpZ), true, true);
 			// 	IsWallSliding = false;
 			// }
-		}
+
+	}
+	else if (JumpCounter < MaximumJumps && !IsWallSliding)
+	{
+		ACharacter::LaunchCharacter(FVector(0.f,0.f,JumpZ), false,true);
+		JumpCounter++;
 	}
 }
 
@@ -263,24 +264,26 @@ void AMainCharacter::WallSlide(float Value)
 {
 	FVector EyesLoc;
 	FRotator EyesRot;
-	FHitResult TraceHit;
+	FHitResult WallSlideTraceHit;
 
 	GetController()->GetActorEyesViewPoint(EyesLoc, EyesRot);
 
 	FVector TraceStart = EyesLoc + FVector(0.f, 0.f,-50.f);;
-	FVector TraceEnd = (EyesRot.Vector() * 15.f) + TraceStart;
+	FVector TraceEnd = (EyesRot.Vector() * 16.f) + TraceStart;
 	
 	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red );
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
 
+	IsWallSliding = false;
 	
-	if (GetWorld()->LineTraceSingleByChannel(TraceHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
+	if (GetWorld()->LineTraceSingleByChannel(WallSlideTraceHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
 	{
-		HitObjectDirection = TraceHit.Location.X;
+		HitObjectDirection = WallSlideTraceHit.Location.X;
 		//Check if we hit an interactable object
-		if (TraceHit.GetActor())
+
+		if (WallSlideTraceHit.GetActor())
 		{
 			if (GetCharacterMovement()->IsFalling() && GetCharacterMovement()->Velocity.Z < 0)
 			{
@@ -290,7 +293,7 @@ void AMainCharacter::WallSlide(float Value)
 									 GetSprite()->GetForwardVector().X));
 				
 				// GetMovementComponent()->SlideAlongSurface(GetSprite()->GetForwardVector(), GetWorld()->GetDeltaSeconds(), FVector(0.f,0.f,250.f), TraceHit, true);
-				WallSlideDirection = TraceHit.GetActor()->GetActorRotation().Yaw;
+				WallSlideDirection = WallSlideTraceHit.GetActor()->GetActorRotation().Yaw;
 				// GetCharacterMovement()->Velocity = FMath::VInterpConstantTo(GetCharacterMovement()->Velocity, FVector(0.f), GetWorld()->GetDeltaSeconds(), -900.f);
 
 				GetCharacterMovement()->Velocity = FVector(0.f,0.f,-100.f);
