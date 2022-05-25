@@ -45,6 +45,10 @@ public:
 	AMainCharacter();
 
 	UTextRenderComponent* TextComponent;
+	bool IsWallSliding;
+	float HitObjectDirection;
+	float WallSlideDirection;
+
 	virtual void Tick(float DeltaSeconds) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room Camera")
@@ -71,6 +75,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Interaction")
 	float InteractionCheckDistance;
 
+	void WallSlide(float Value);
+	
 	void PerformInteractionCheck();
 
 	void CouldntFindInteractable();
@@ -101,6 +107,19 @@ public:
 
 	//Get the time till we interact with the current interactable
 	float GetRemainingInteractTime() const;
+
+	// ---------- PROPERTIES ---------- //
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Jump")
+	int JumpCounter;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Jump")
+	int MaximumJumps;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Jump")
+	float JumpHeight;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Dash")
+	int DashCounter;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Dash")
+	float DashDistance;
 	
 protected:
 	virtual void BeginPlay() override;

@@ -15,7 +15,14 @@
 DEFINE_LOG_CATEGORY_STATIC(SideScrollerCharacter, Log, All);
 
 
-AMainCharacter::AMainCharacter()
+AMainCharacter::AMainCharacter() :
+	JumpCounter(0),
+	MaximumJumps(1),
+	JumpHeight(1500.f),
+	DashCounter(0),
+	DashDistance(2000.f),
+	HitObjectDirection(0.f),
+	IsWallSliding(false)
 {
 	// Use only Yaw from the controller and ignore the rest of the rotation.
 	bUseControllerRotationPitch = false;
@@ -35,7 +42,7 @@ AMainCharacter::AMainCharacter()
 	GetCharacterMovement()->GroundFriction = 3.0f;
 	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 	GetCharacterMovement()->MaxFlySpeed = 600.0f;
-	// GetCharacterMovement()->FallingLateralFriction = 0.2f;
+	GetCharacterMovement()->AirControl = 0.5f;
 
 	// Lock character motion onto the XZ plane, so the character can't move in or out of the screen
 	GetCharacterMovement()->bConstrainToPlane = true;
@@ -112,25 +119,6 @@ void AMainCharacter::Tick(float DeltaSeconds)
 	
 	UpdateCharacter();
 
-	if (GetCharacterMovement()->IsFalling())
-	{
-		FHitResult TraceHit;
-		FCollisionQueryParams QueryParams;
-		QueryParams.AddIgnoredActor(this);
-		
-		FVector SpriteLocation = GetSprite()->GetRelativeLocation();
-		FVector SpriteForwardVector = GetSprite()->GetForwardVector() * FVector(70.f) + SpriteLocation;
-		bool HittingWall = GetWorld()->LineTraceSingleByChannel(TraceHit, SpriteLocation, SpriteForwardVector, ECC_Visibility, QueryParams);
-
-		if (HittingWall)
-		{
-			GEngine->AddOnScreenDebugMessage(-5, 5.f, FColor::Red, TEXT("Found a wall"));
-			float WallSlideDirection = TraceHit.GetActor()->GetActorRotation().Yaw + 180.f;
-			GetSprite()->SetRelativeRotation(FRotator(WallSlideDirection, 0.f, 0.f));
-		}
-		GetCharacterMovement()->Velocity = FMath::VInterpConstantTo(GetCharacterMovement()->Velocity, FVector(0.f), GetWorld()->GetDeltaSeconds(), 900.f);
-	}
-
 	if (GetWorld()->TimeSince(InteractionData.LastInteractionCheckTime) > InteractionCheckFrequency)
 	{
 		PerformInteractionCheck();
@@ -161,6 +149,39 @@ void AMainCharacter::Jump()
 	Super::Jump();
 	
 	Squish(-.2, .2, .2);
+
+	UE_LOG(LogTemp, Warning, TEXT("Found Wall!"));
+	if (GetCharacterMovement()->IsFalling() && IsWallSliding)
+	{
+		JumpCounter++;
+		if(JumpCounter <= MaximumJumps)
+		{
+			float JumpZ = GetCharacterMovement()->JumpZVelocity;
+			float AddedForce = 20.f;
+			
+			if (HitObjectDirection >= 0 && IsWallSliding)
+			{
+				// GEngine->AddOnScreenDebugMessage(-5, 5.f, FColor::Red,
+				// 								 FString::Printf(TEXT("Left Wall Returns: %f"),
+				// 									 GetSprite()->GetRelativeRotation().Roll));
+
+				// 								 FString::Printf(TEXT("Sliding Velocity: %f"),
+				// 									 CurrentVelocity));
+
+				LaunchCharacter(FVector(HitObjectDirection * AddedForce, 0.f, JumpZ), true, true);
+				IsWallSliding = false;
+			}
+			else
+			{
+				GEngine->AddOnScreenDebugMessage(-5, 5.f, FColor::Red,
+								 FString::Printf(TEXT("Right Wall Returns: %f"),
+									 HitObjectDirection));
+				
+				LaunchCharacter(FVector(HitObjectDirection * AddedForce, 0.f, -JumpZ), true, true);
+				IsWallSliding = false;
+			}
+		}
+	}
 }
 
 void AMainCharacter::Landed(const FHitResult& Hit)
@@ -168,6 +189,10 @@ void AMainCharacter::Landed(const FHitResult& Hit)
 	Super::Landed(Hit);
 	
 	Squish(.3, -.3, 0.1);
+
+	/* Reset the ability to Jump and Dash when landed */
+	JumpCounter = 0;
+	DashCounter = 0;
 }
 
 void AMainCharacter::MoveRight(float Value)
@@ -176,6 +201,8 @@ void AMainCharacter::MoveRight(float Value)
 
 	// Apply the input to the character motion
 	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
+
+	WallSlide(Value);
 }
 
 void AMainCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
@@ -224,28 +251,77 @@ float AMainCharacter::GetRemainingInteractTime() const
 	return GetWorldTimerManager().GetTimerRemaining(TimerHandle_Interact);
 }
 
+void AMainCharacter::WallSlide(float Value)
+{
+	FVector EyesLoc;
+	FRotator EyesRot;
+	FHitResult TraceHit;
+
+	GetController()->GetActorEyesViewPoint(EyesLoc, EyesRot);
+
+	FVector TraceStart = EyesLoc + FVector(0.f, 0.f,-50.f);;
+	FVector TraceEnd = (EyesRot.Vector() * 15.f) + TraceStart;
+	
+	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red );
+
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+
+	
+	if (GetWorld()->LineTraceSingleByChannel(TraceHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
+	{
+		HitObjectDirection = TraceHit.Location.X;
+		//Check if we hit an interactable object
+		if (TraceHit.GetActor())
+		{
+			if (GetCharacterMovement()->IsFalling() && GetCharacterMovement()->Velocity.Z < 0)
+			{
+				IsWallSliding = true;
+				
+				// GetMovementComponent()->SlideAlongSurface(GetSprite()->GetForwardVector(), GetWorld()->GetDeltaSeconds(), FVector(0.f,0.f,250.f), TraceHit, true);
+				WallSlideDirection = TraceHit.GetActor()->GetActorRotation().Yaw +180.f;
+				// GetCharacterMovement()->Velocity = FMath::VInterpConstantTo(GetCharacterMovement()->Velocity, FVector(0.f), GetWorld()->GetDeltaSeconds(), -900.f);
+
+				GetCharacterMovement()->Velocity = FVector(0.f,0.f,-100.f);
+				
+				// GetCharacterMovement()->Velocity = FVector(0.f,0.f,-0.2f);
+				// float CurrentVelocity = GetCharacterMovement()->Velocity.Z;
+				// GEngine->AddOnScreenDebugMessage(-5, 5.f, FColor::Red,
+				// 								 FString::Printf(TEXT("Sliding Velocity: %f"),
+				// 									 CurrentVelocity));
+
+			}
+		}
+		// else
+		// {
+		// 	IsWallSliding = false;
+		// }
+	}
+}
+
 void AMainCharacter::PerformInteractionCheck()
 {
 	if (GetController() == nullptr)
 	{
 		return;
 	}
-	
+
 	InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
 
 	FVector EyesLoc;
 	FRotator EyesRot;
+	FHitResult TraceHit;
 
 	GetController()->GetActorEyesViewPoint(EyesLoc, EyesRot);
 
 	FVector TraceStart = EyesLoc + FVector(0.f, 0.f,-50.f);;
 	FVector TraceEnd = (EyesRot.Vector() * InteractionCheckDistance) + TraceStart;
-	FHitResult TraceHit;
 	
 	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red );
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
+
 
 	if (GetWorld()->LineTraceSingleByChannel(TraceHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
 	{
@@ -257,6 +333,9 @@ void AMainCharacter::PerformInteractionCheck()
 				float Distance = (TraceStart - TraceHit.ImpactPoint).Size();
 				if (InteractionComponent != GetInteractable() && Distance <= InteractionComponent->InteractionDistance)
 				{
+					// GEngine->AddOnScreenDebugMessage(-5, 2, FColor::Red, TEXT("HIT THE OBJECT"));
+					// UE_LOG(LogTemp, Warning, TEXT("Found an interactable object!"));
+
 					FoundNewInteractable(InteractionComponent);
 				}
 				else if (Distance > InteractionComponent->InteractionDistance && GetInteractable())
