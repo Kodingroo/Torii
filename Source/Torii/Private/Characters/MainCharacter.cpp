@@ -167,24 +167,10 @@ void AMainCharacter::DoubleJump()
 			}
 			
 			IsWallSliding = false;
-			// if (HitObjectDirection >= 0 && IsWallSliding)
-			// {
 
-				// 								 FString::Printf(TEXT("Sliding Velocity: %f"),
-				// 									 CurrentVelocity));
-
-				// LaunchCharacter(FVector(HitObjectDirection * AddedForce, 0.f, JumpZ), true, true);
-			// }
-			// else
-			// {
-				GEngine->AddOnScreenDebugMessage(-5, 5.f, FColor::Red,
-								 FString::Printf(TEXT("Wall Returns: %f"),
-									 GetSprite()->GetForwardVector().X ));
-			// 	
-			// 	LaunchCharacter(FVector(HitObjectDirection * AddedForce, 0.f, -JumpZ), true, true);
-			// 	IsWallSliding = false;
-			// }
-
+				// GEngine->AddOnScreenDebugMessage(-5, 5.f, FColor::Red,
+				// 				 FString::Printf(TEXT("Wall Returns: %f"),
+				// 					 GetSprite()->GetForwardVector().X ));
 	}
 	else if (JumpCounter < MaximumJumps && !IsWallSliding)
 	{
@@ -285,31 +271,18 @@ void AMainCharacter::WallSlide(float Value)
 
 		if (WallSlideTraceHit.GetActor())
 		{
-			if (GetCharacterMovement()->IsFalling() && GetCharacterMovement()->Velocity.Z < 0)
+			if (GetCharacterMovement()->IsFalling() && GetCharacterMovement()->Velocity.Z < 0 && Value != 0)
 			{
 				IsWallSliding = true;
 				GEngine->AddOnScreenDebugMessage(-5, 5.f, FColor::Red,
 								 FString::Printf(TEXT("Left Wall Returns: %f"),
 									 GetSprite()->GetForwardVector().X));
 				
-				// GetMovementComponent()->SlideAlongSurface(GetSprite()->GetForwardVector(), GetWorld()->GetDeltaSeconds(), FVector(0.f,0.f,250.f), TraceHit, true);
 				WallSlideDirection = WallSlideTraceHit.GetActor()->GetActorRotation().Yaw;
-				// GetCharacterMovement()->Velocity = FMath::VInterpConstantTo(GetCharacterMovement()->Velocity, FVector(0.f), GetWorld()->GetDeltaSeconds(), -900.f);
-
-				GetCharacterMovement()->Velocity = FVector(0.f,0.f,-100.f);
 				
-				// GetCharacterMovement()->Velocity = FVector(0.f,0.f,-0.2f);
-				// float CurrentVelocity = GetCharacterMovement()->Velocity.Z;
-				// GEngine->AddOnScreenDebugMessage(-5, 5.f, FColor::Red,
-				// 								 FString::Printf(TEXT("Sliding Velocity: %f"),
-				// 									 CurrentVelocity));
-
+				GetCharacterMovement()->Velocity = FVector(0.f,0.f,-100.f);
 			}
 		}
-		// else
-		// {
-		// 	IsWallSliding = false;
-		// }
 	}
 }
 
