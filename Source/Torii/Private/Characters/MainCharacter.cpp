@@ -157,29 +157,37 @@ void AMainCharacter::Jump()
 		if(JumpCounter <= MaximumJumps)
 		{
 			float JumpZ = GetCharacterMovement()->JumpZVelocity;
-			float AddedForce = 20.f;
-			
-			if (HitObjectDirection >= 0 && IsWallSliding)
+			float AddedForce = -3;
+			float OppositeFacingDirection = 0;
+			if (GetSprite()->GetForwardVector().X < 0)
 			{
-				// GEngine->AddOnScreenDebugMessage(-5, 5.f, FColor::Red,
-				// 								 FString::Printf(TEXT("Left Wall Returns: %f"),
-				// 									 GetSprite()->GetRelativeRotation().Roll));
+				OppositeFacingDirection = GetActorRotation().Yaw  ;
+				LaunchCharacter(FVector(OppositeFacingDirection * AddedForce, 0.f, JumpZ), true, true);
+			}
+			else if (GetSprite()->GetForwardVector().X > 0)
+			{
+				OppositeFacingDirection = GetActorRotation().Yaw + 180.f;
+				LaunchCharacter(FVector(OppositeFacingDirection * AddedForce, 0.f, JumpZ), true, true);
+			}
+			
+			// if (HitObjectDirection >= 0 && IsWallSliding)
+			// {
 
 				// 								 FString::Printf(TEXT("Sliding Velocity: %f"),
 				// 									 CurrentVelocity));
 
-				LaunchCharacter(FVector(HitObjectDirection * AddedForce, 0.f, JumpZ), true, true);
+				// LaunchCharacter(FVector(HitObjectDirection * AddedForce, 0.f, JumpZ), true, true);
 				IsWallSliding = false;
-			}
-			else
-			{
+			// }
+			// else
+			// {
 				GEngine->AddOnScreenDebugMessage(-5, 5.f, FColor::Red,
-								 FString::Printf(TEXT("Right Wall Returns: %f"),
-									 HitObjectDirection));
-				
-				LaunchCharacter(FVector(HitObjectDirection * AddedForce, 0.f, -JumpZ), true, true);
-				IsWallSliding = false;
-			}
+								 FString::Printf(TEXT("Wall Returns: %f"),
+									 GetSprite()->GetForwardVector().X ));
+			// 	
+			// 	LaunchCharacter(FVector(HitObjectDirection * AddedForce, 0.f, -JumpZ), true, true);
+			// 	IsWallSliding = false;
+			// }
 		}
 	}
 }
@@ -277,9 +285,12 @@ void AMainCharacter::WallSlide(float Value)
 			if (GetCharacterMovement()->IsFalling() && GetCharacterMovement()->Velocity.Z < 0)
 			{
 				IsWallSliding = true;
+				GEngine->AddOnScreenDebugMessage(-5, 5.f, FColor::Red,
+								 FString::Printf(TEXT("Left Wall Returns: %f"),
+									 GetSprite()->GetForwardVector().X));
 				
 				// GetMovementComponent()->SlideAlongSurface(GetSprite()->GetForwardVector(), GetWorld()->GetDeltaSeconds(), FVector(0.f,0.f,250.f), TraceHit, true);
-				WallSlideDirection = TraceHit.GetActor()->GetActorRotation().Yaw +180.f;
+				WallSlideDirection = TraceHit.GetActor()->GetActorRotation().Yaw;
 				// GetCharacterMovement()->Velocity = FMath::VInterpConstantTo(GetCharacterMovement()->Velocity, FVector(0.f), GetWorld()->GetDeltaSeconds(), -900.f);
 
 				GetCharacterMovement()->Velocity = FVector(0.f,0.f,-100.f);
