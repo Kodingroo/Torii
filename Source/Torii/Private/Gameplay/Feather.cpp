@@ -3,6 +3,7 @@
 
 #include "Gameplay/Feather.h"
 
+#include "PaperSpriteComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 #include "Characters/MainCharacter.h"
@@ -15,8 +16,8 @@ AFeather::AFeather() :
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	FeatherMesh = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Props/Feather/Meshes/SM_Pickup_Feather.SM_Pickup_Feather'")).Object;
-	Mesh->SetStaticMesh(FeatherMesh);
+	// FeatherMesh = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Props/Feather/Meshes/SM_Pickup_Feather.SM_Pickup_Feather'")).Object;
+	// Mesh->SetStaticMesh(FeatherMesh);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	/* Rotation inherited from Pickup */

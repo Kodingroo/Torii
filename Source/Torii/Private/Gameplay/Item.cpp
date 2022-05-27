@@ -1,50 +1,47 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Gameplay/Feather.h"
+#include "Gameplay/Item.h"
 
-#include "Kismet/GameplayStatics.h"
-
-#include "Characters/MainCharacter.h"
+#include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 #include "Core/Debug.h"
 
-UStaticMesh* CoinMesh;
-
-AFeather::AFeather() :
-	CoinSize(FVector(3.f))
+// Sets default values
+AItem::AItem()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
-	CoinMesh = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Props/Coin/Meshes/SM_Pickup_Coin.SM_Pickup_Coin'")).Object;
-	Mesh->SetStaticMesh(CoinMesh);
-	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	/* Setting collision for use in child objects Pickup etc.*/ 
+	CollisionVolume = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionVolume"));
+	RootComponent = CollisionVolume;
 
-	/* Rotation inherited from Pickup */
-	SetActorRelativeScale3D(CoinSize);
-
-	/* Load Sound Cue */
-	static ConstructorHelpers::FObjectFinder<USoundCue> CoinSoundCueObject(TEXT("SoundCue'/Game/SoundAssets/SC_Coin.SC_Coin'"));
-	if (CoinSoundCueObject.Succeeded())
-	{
-		CoinSoundCue = CoinSoundCueObject.Object;
-	}
+	/* Setting up Mesh Component to be assigned by children */
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	Mesh->SetupAttachment(GetRootComponent());
 }
 
-void AFeather::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-						   int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AItem::BeginPlay()
 {
-	Super::OnOverlapBegin(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
+	Super::BeginPlay();
 
-	const AK_BasicCharacter* Player = Cast<AK_BasicCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	CollisionVolume->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnOverlapBegin);
+}
+
+void AItem::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+void AItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
 	
-	if (OtherActor != nullptr && OtherActor != this && OtherActor == Player)
-	{
-		/* Broadcasting the Event through the Assigned Dispatch in the header to any Observers interested in Binding to the Event */
-		OnCoinCollected.Broadcast(true);
-
-		/* Sound Effects */ 
-		UGameplayStatics::PlaySound2D(GetWorld(), CoinSoundCue);
-		
-		Destroy();
-	}
 }
+
+void AItem::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	
+}
+

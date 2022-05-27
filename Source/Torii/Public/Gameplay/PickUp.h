@@ -15,12 +15,5 @@ public:
 	APickUp();
 
 	virtual void Tick(float DeltaTime) override;
-
-	/* Toggles on/off rotation */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="PickUp | PickUpProperties")
-	bool bRotate;
-
-	/* Rate at which the Mesh should Rotate */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="PickUp | PickUpProperties")
-	float RotationRate;
+	
 };

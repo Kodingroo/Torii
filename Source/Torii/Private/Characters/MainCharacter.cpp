@@ -22,7 +22,8 @@ AMainCharacter::AMainCharacter() :
 	DashCounter(0),
 	DashDistance(2000.f),
 	HitObjectDirection(0.f),
-	IsWallSliding(false)
+	IsWallSliding(false),
+	OnLadder(false)
 {
 	// Use only Yaw from the controller and ignore the rest of the rotation.
 	bUseControllerRotationPitch = false;
@@ -136,6 +137,7 @@ void AMainCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AMainCharacter::DoubleJump);
 	// PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMainCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("MoveForward", this, &AMainCharacter::MoveForward);
 
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &AMainCharacter::TouchStarted);
 	PlayerInputComponent->BindTouch(IE_Released, this, &AMainCharacter::TouchStopped);
@@ -194,11 +196,29 @@ void AMainCharacter::MoveRight(float Value)
 {
 	/*UpdateChar();*/
 
-	// Apply the input to the character motion
+	if (!OnLadder)
+	{
 	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
+	}
+	else
+	{
+		AddMovementInput(FVector(0.0f));
+	}
+	// Apply the input to the character motion
 
 	WallSlide(Value);
 }
+
+
+void AMainCharacter::MoveForward(float Value)
+{
+	if(OnLadder)
+	{
+		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		AddMovementInput(GetSprite()->GetUpVector(), Value);
+	}
+}
+
 
 void AMainCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
 {

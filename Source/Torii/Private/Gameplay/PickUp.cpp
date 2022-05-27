@@ -3,3 +3,17 @@
 
 #include "Gameplay/PickUp.h"
 
+
+#include "Core/Debug.h"
+
+
+APickUp::APickUp() 
+{
+	
+}
+
+void APickUp::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	
+}

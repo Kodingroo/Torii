@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "Components/BoxComponent.h"
 #include "Item.generated.h"
 
 class USphereComponent;
@@ -21,9 +21,9 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	
-	/** Overlapping Sphere */
+	/** Overlapping Box */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Item | Collision")
-	USphereComponent* CollisionVolume;
+	UBoxComponent* CollisionVolume;
 
 	/** Base Mesh Component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Item | Mesh")
@@ -31,4 +31,6 @@ public:
 	
 	UFUNCTION()
 	virtual void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	virtual void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 };

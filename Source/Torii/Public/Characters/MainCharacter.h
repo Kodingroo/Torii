@@ -120,6 +120,8 @@ public:
 	int DashCounter;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Dash")
 	float DashDistance;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Climb")
+	mutable bool OnLadder;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -151,6 +153,9 @@ protected:
 	/** Called for side to side input */
 	void MoveRight(float Value);
 
+	/** Called for up/down ladder input */
+	void MoveForward(float Value);
+
 	void UpdateCharacter();
 
 	/** Handle touch inputs. */
@@ -168,3 +173,4 @@ protected:
 	virtual void Landed(const FHitResult& Hit) override;
 
 };
+

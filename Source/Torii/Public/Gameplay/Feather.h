@@ -10,7 +10,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFeatherCollected, bool, bFeatherCollected);
 
 UCLASS()
-class UE4_KODINGROO_API AFeather : public APickUp
+class TORII_API AFeather : public APickUp
 {
 	GENERATED_BODY()
 	
