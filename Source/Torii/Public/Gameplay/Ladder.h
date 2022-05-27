@@ -9,7 +9,7 @@
 #include "Ladder.generated.h"
 
 UCLASS()
-class TORII_API ALadder : public APaperSpriteActor
+class TORII_API ALadder : public AActor
 {
 	GENERATED_BODY()
 	
@@ -30,10 +30,12 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	/** Base Mesh Component */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Item | Mesh")
-	UPaperSpriteComponent* PaperSprite;
+	/** Overlapping Box */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Item | Collision")
+	UBoxComponent* CollisionVolume;
 
-	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	virtual void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	virtual void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 };

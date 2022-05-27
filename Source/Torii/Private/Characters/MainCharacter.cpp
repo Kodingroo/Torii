@@ -7,6 +7,7 @@
 #include "Components/TextRenderComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "Core/Debug.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "Gameplay/Components/InteractionComponent.h"
@@ -202,6 +203,7 @@ void AMainCharacter::MoveRight(float Value)
 	}
 	else
 	{
+		UDebug::Print(WARNING, "Youre inside the Move Right Function");
 		AddMovementInput(FVector(0.0f));
 	}
 	// Apply the input to the character motion
@@ -214,6 +216,7 @@ void AMainCharacter::MoveForward(float Value)
 {
 	if(OnLadder)
 	{
+		UDebug::Print(WARNING, "Youre inside the Move Forward Function");
 		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 		AddMovementInput(GetSprite()->GetUpVector(), Value);
 	}
