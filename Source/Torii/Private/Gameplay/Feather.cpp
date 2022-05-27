@@ -8,25 +8,25 @@
 #include "Characters/MainCharacter.h"
 #include "Core/Debug.h"
 
-UStaticMesh* CoinMesh;
+UStaticMesh* FeatherMesh;
 
 AFeather::AFeather() :
-	CoinSize(FVector(3.f))
+	FeatherSize(FVector(3.f))
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	CoinMesh = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Props/Coin/Meshes/SM_Pickup_Coin.SM_Pickup_Coin'")).Object;
-	Mesh->SetStaticMesh(CoinMesh);
+	FeatherMesh = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Props/Feather/Meshes/SM_Pickup_Feather.SM_Pickup_Feather'")).Object;
+	Mesh->SetStaticMesh(FeatherMesh);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	/* Rotation inherited from Pickup */
-	SetActorRelativeScale3D(CoinSize);
+	SetActorRelativeScale3D(FeatherSize);
 
 	/* Load Sound Cue */
-	static ConstructorHelpers::FObjectFinder<USoundCue> CoinSoundCueObject(TEXT("SoundCue'/Game/SoundAssets/SC_Coin.SC_Coin'"));
-	if (CoinSoundCueObject.Succeeded())
+	static ConstructorHelpers::FObjectFinder<USoundCue> FeatherSoundCueObject(TEXT("SoundCue'/Game/SoundAssets/SC_Feather.SC_Feather'"));
+	if (FeatherSoundCueObject.Succeeded())
 	{
-		CoinSoundCue = CoinSoundCueObject.Object;
+		FeatherSoundCue = FeatherSoundCueObject.Object;
 	}
 }
 
@@ -35,15 +35,15 @@ void AFeather::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* 
 {
 	Super::OnOverlapBegin(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 
-	const AK_BasicCharacter* Player = Cast<AK_BasicCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	const AMainCharacter* Player = Cast<AMainCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 	
 	if (OtherActor != nullptr && OtherActor != this && OtherActor == Player)
 	{
 		/* Broadcasting the Event through the Assigned Dispatch in the header to any Observers interested in Binding to the Event */
-		OnCoinCollected.Broadcast(true);
+		OnFeatherCollected.Broadcast(true);
 
 		/* Sound Effects */ 
-		UGameplayStatics::PlaySound2D(GetWorld(), CoinSoundCue);
+		UGameplayStatics::PlaySound2D(GetWorld(), FeatherSoundCue);
 		
 		Destroy();
 	}
