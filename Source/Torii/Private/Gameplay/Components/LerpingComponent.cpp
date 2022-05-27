@@ -1,54 +1,69 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#pragma once
 
-#include "CoreMinimal.h"
-#include "Components/SceneComponent.h"
-#include "LerpingComponent.generated.h"
+#include "Gameplay/Components/LerpingComponent.h"
 
-
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class TORII_API ULerpingComponent : public USceneComponent
+ULerpingComponent::ULerpingComponent()
 {
-	GENERATED_BODY()
+	PrimaryComponentTick.bCanEverTick = true;
 
-public:	
-	ULerpingComponent();
+	Parent = GetOwner();
 
-protected:
-	virtual void BeginPlay() override;
-
-private:
-	UPROPERTY(VisibleAnywhere, Category="Actor Reference")
-	AActor* Parent = nullptr;
+	bShouldLoop = true;
 	
-	/* Variables from Sin Function */
-	float RunningTime;
-	float BaseZLocation;
-	
+	/* Variables for Sin */ 
+	RunningTime = 0;
+
 	/* Variables for True Lerp */ 
-	float TimeElapsed = 0;
-	FVector StartLocation;
-	FVector TargetLocation;
+	LerpDuration = 3;
+	WaitTime = 0;
+}
 
-public:	
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+void ULerpingComponent::BeginPlay()
+{
+	Super::BeginPlay();
 
-	/* Variables from Sin Function */
-	UPROPERTY(EditAnywhere, Category="Sin")
-	bool bShouldLoop;
-	UPROPERTY(EditAnywhere, Category="Sin");
-	float Amplitude;
-	UPROPERTY(EditAnywhere, Category="Sin");
-	float Period;
-	UPROPERTY(EditAnywhere, Category="Sin");
-	float PhaseShift;
-	UPROPERTY(EditAnywhere, Category="Sin");
-	float VerticalShift;
+	/* Set variables for Sin */ 
+	BaseZLocation = Parent->GetActorLocation().Z;
+	Amplitude = 500.f;
+	Period = 2.f;
+	PhaseShift = 1.f;
+	VerticalShift = 1.f;
 	
-	/* Variables for True Lerp */ 
-	UPROPERTY(EditAnywhere, Category="Lerp")
-	float LerpDuration;
-	UPROPERTY(EditAnywhere, Category="Lerp")
-	float WaitTime;
-};
+	/* Set variables for True Lerp */ 
+	StartLocation = Parent->GetActorLocation();
+	TargetLocation = StartLocation + FVector(0.f, 0.f, 600.f);
+}
+
+void ULerpingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	/* Small delay just to stop it looking choppy due to lag on load */
+	if (WaitTime > 0)
+	{
+		WaitTime -= DeltaTime;
+		return;
+	}
+
+	if (bShouldLoop)
+	{
+		FVector NewLocation = Parent->GetActorLocation();
+
+		NewLocation.Z = BaseZLocation + (Amplitude) * FMath::Sin(Period * RunningTime - PhaseShift) + VerticalShift;
+		
+		Parent->SetActorLocation(NewLocation);
+		RunningTime += DeltaTime;
+	}
+	else
+	{
+		if (TimeElapsed < LerpDuration)
+		{
+			/* Move Parent Actor to Target Location */
+			Parent->SetActorLocation(FMath::Lerp(StartLocation, TargetLocation, TimeElapsed / LerpDuration));
+			/* Kep track of elapsed time */
+			TimeElapsed += DeltaTime;
+		}
+	}
+}
+
