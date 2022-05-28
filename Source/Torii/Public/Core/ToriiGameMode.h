@@ -16,5 +16,10 @@ class TORII_API AToriiGameMode : public AGameModeBase
 
 public:
 	AToriiGameMode();
+
+	virtual void StartPlay() override;
+
+private:
+	void SetupPlayer();
 	
 };
