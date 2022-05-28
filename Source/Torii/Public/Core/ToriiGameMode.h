@@ -21,6 +21,9 @@ public:
 
 	UFUNCTION()
 	void OpenMenu();
+
+	UFUNCTION(BlueprintCallable, Category="Initialize Level")
+	void InitCoinCollectedEvent() const;
 	
 private:
 	void SetupPlayer();

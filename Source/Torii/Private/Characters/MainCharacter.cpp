@@ -69,6 +69,8 @@ AMainCharacter::AMainCharacter() :
 	/* Interactions */ 
 	InteractionCheckFrequency = 0.f;
 	InteractionCheckDistance = 50.f;
+
+	
 }
 
 //////////////////////////////////////////////////////////////////////////

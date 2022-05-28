@@ -22,17 +22,7 @@ void AToriiGameMode::StartPlay()
 
 	Super::StartPlay();
 	
-	/* Display Main Menu when first loading only */ 
-	// const UWorld* World = GEngine->GameViewport->GetWorld();
-
-	/* Displaying Main Menu in Blueprints */ 
-	// UDebug::Print(WARNING, "Game Mode Start Play");
-	// AMainPlayerController* PlayerController = Cast<AMainPlayerController>(UGameplayStatics::GetPlayerController(World, 0));
-	// if (PlayerController)
-	// {
-	// 	UDebug::Print(WARNING, "Game Mode Controller call");
-	// 	PlayerController->OpenMenu();
-	// }
+	InitCoinCollectedEvent();
 }
 
 void AToriiGameMode::SetupPlayer()
@@ -63,5 +53,16 @@ void AToriiGameMode::OpenMenu()
 			PC->bShowMouseCursor = true;
 		}
 	}
+}
+
+
+void AToriiGameMode::InitCoinCollectedEvent() const
+{
+	AMainPlayerController* PlayerController = Cast<AMainPlayerController>(UGameplayStatics::GetPlayerController(GEngine->GameViewport->GetWorld(), 0));
+
+	if (PlayerController)
+	{
+		PlayerController->BindFeatherCollectedEvent();
+	}    
 }
 
