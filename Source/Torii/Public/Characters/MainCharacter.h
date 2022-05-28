@@ -49,6 +49,9 @@ public:
 	float HitObjectDirection;
 	float WallSlideDirection;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Audio")
+	USoundBase* JumpSoundCue;
+
 	virtual void Tick(float DeltaSeconds) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room Camera")

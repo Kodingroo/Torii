@@ -21,7 +21,7 @@ DEFINE_LOG_CATEGORY_STATIC(SideScrollerCharacter, Log, All);
 
 AMainCharacter::AMainCharacter() :
 	JumpCounter(0),
-	MaximumJumps(1),
+	MaximumJumps(2),
 	JumpHeight(750.f),
 	DashCounter(0),
 	DashDistance(2000.f),
@@ -193,11 +193,14 @@ void AMainCharacter::DoubleJump()
 				// GEngine->AddOnScreenDebugMessage(-5, 5.f, FColor::Red,
 				// 				 FString::Printf(TEXT("Wall Returns: %f"),
 				// 					 GetSprite()->GetForwardVector().X ));
+		UGameplayStatics::PlaySound2D(GetWorld(), JumpSoundCue);
 	}
 	else if (JumpCounter < MaximumJumps && !IsWallSliding)
 	{
 		ACharacter::LaunchCharacter(FVector(0.f,0.f,JumpZ), false,true);
 		JumpCounter++;
+
+		UGameplayStatics::PlaySound2D(GetWorld(), JumpSoundCue);
 	}
 }
 
@@ -222,7 +225,6 @@ void AMainCharacter::MoveRight(float Value)
 	}
 	else
 	{
-		UDebug::Print(WARNING, "Youre inside the Move Right Function");
 		AddMovementInput(FVector(0.0f));
 	}
 	// Apply the input to the character motion
@@ -235,7 +237,6 @@ void AMainCharacter::MoveForward(float Value)
 {
 	if(OnLadder)
 	{
-		UDebug::Print(WARNING, "Youre inside the Move Forward Function");
 		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 		AddMovementInput(GetSprite()->GetUpVector(), Value);
 	}
@@ -299,7 +300,7 @@ void AMainCharacter::WallSlide(float Value)
 	FVector TraceStart = EyesLoc + FVector(0.f, 0.f,-50.f);;
 	FVector TraceEnd = (EyesRot.Vector() * 16.f) + TraceStart;
 	
-	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red );
+	// DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red );
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
@@ -316,10 +317,10 @@ void AMainCharacter::WallSlide(float Value)
 			if (GetCharacterMovement()->IsFalling() && GetCharacterMovement()->Velocity.Z < 0 && Value != 0)
 			{
 				IsWallSliding = true;
-				GEngine->AddOnScreenDebugMessage(-5, 5.f, FColor::Red,
-								 FString::Printf(TEXT("Left Wall Returns: %f"),
-									 GetSprite()->GetForwardVector().X));
-				
+				// GEngine->AddOnScreenDebugMessage(-5, 5.f, FColor::Red,
+				// 				 FString::Printf(TEXT("Left Wall Returns: %f"),
+				// 					 GetSprite()->GetForwardVector().X));
+				//
 				WallSlideDirection = WallSlideTraceHit.GetActor()->GetActorRotation().Yaw;
 				
 				GetCharacterMovement()->Velocity = FVector(0.f,0.f,-100.f);
@@ -346,7 +347,7 @@ void AMainCharacter::PerformInteractionCheck()
 	FVector TraceStart = EyesLoc + FVector(0.f, 0.f,-50.f);;
 	FVector TraceEnd = (EyesRot.Vector() * InteractionCheckDistance) + TraceStart;
 	
-	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red );
+	// DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red );
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
