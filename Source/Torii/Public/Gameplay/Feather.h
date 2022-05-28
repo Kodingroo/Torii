@@ -3,6 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PaperFlipbook.h"
+#include "PaperFlipbookComponent.h"
+#include "PaperSpriteComponent.h"
 #include "Gameplay/PickUp.h"
 #include "Sound/SoundCue.h"
 #include "Feather.generated.h"
@@ -16,6 +19,9 @@ class TORII_API AFeather : public APickUp
 	
 public:
 	AFeather();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Animations)
+	UPaperFlipbookComponent* FB_Feather;
 
 	/* Declaring a Delegate/ Event Dispatcher and setting it up as a Property people can interact with */
 	UPROPERTY(BlueprintAssignable, Category="EventDispatches")

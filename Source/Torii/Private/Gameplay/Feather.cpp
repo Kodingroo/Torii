@@ -3,6 +3,7 @@
 
 #include "Gameplay/Feather.h"
 
+#include "PaperFlipbookComponent.h"
 #include "PaperSpriteComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -23,12 +24,8 @@ AFeather::AFeather() :
 	/* Rotation inherited from Pickup */
 	SetActorRelativeScale3D(FeatherSize);
 
-	/* Load Sound Cue */
-	// static ConstructorHelpers::FObjectFinder<USoundCue> FeatherSoundCueObject(TEXT("SoundCue'/Game/SoundAssets/SC_Feather.SC_Feather'"));
-	// if (FeatherSoundCueObject.Succeeded())
-	// {
-	// 	FeatherSoundCue = FeatherSoundCueObject.Object;
-	// }
+	FB_Feather = CreateDefaultSubobject<UPaperFlipbookComponent>(TEXT("FeatherFlipbook"));
+	// FB_Feather->AttachTo(RootComponent);
 }
 
 void AFeather::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
