@@ -4,6 +4,7 @@
 #include "Characters/MainPlayerController.h"
 
 #include "Blueprint/UserWidget.h"
+#include "Characters/MainCharacter.h"
 #include "Core/Debug.h"
 #include "Gameplay/Feather.h"
 #include "Kismet/GameplayStatics.h"
@@ -79,8 +80,8 @@ void AMainPlayerController::ObserveFeatherCollected(bool bFeatherCollected)
 
 	if (CollectedFeathers == TotalFeathers)
 	{
-		UDebug::PrintToScreen(WARNING, "Found all feathers", 2);
-		UDebug::Print(ERROR, "Found all Feathers");
+		UDebug::Print(WARNING, "All Feathers Found");
+		AMainCharacter* Main = Cast<AMainCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+		Main->MaximumJumps = 2; 
 	}
-	
 }

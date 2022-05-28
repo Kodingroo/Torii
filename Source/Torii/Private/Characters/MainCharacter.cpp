@@ -19,7 +19,7 @@ DEFINE_LOG_CATEGORY_STATIC(SideScrollerCharacter, Log, All);
 
 AMainCharacter::AMainCharacter() :
 	JumpCounter(0),
-	MaximumJumps(2),
+	MaximumJumps(1),
 	JumpHeight(750.f),
 	DashCounter(0),
 	DashDistance(2000.f),
