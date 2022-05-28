@@ -6,6 +6,7 @@
 #include "PaperCharacter.h"
 #include "Gameplay/ToriiCamera.h"
 #include "PaperFlipbook.h"
+#include "WingsFlipbookComponent.h"
 #include "MainCharacter.generated.h"
 
 class UTextRenderComponent;
@@ -51,6 +52,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Audio")
 	USoundBase* JumpSoundCue;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wings")
+	UWingsFlipbookComponent* WingsFlipbook;
 
 	virtual void Tick(float DeltaSeconds) override;
 
@@ -154,6 +158,9 @@ protected:
 	// The animation to play while hit
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
 	UPaperFlipbook* HitAnimation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
+	UPaperFlipbook* WingsAnimation;
 	
 
 	/** Called to choose the correct animation to play based on the character's movement state */

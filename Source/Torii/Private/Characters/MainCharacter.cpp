@@ -69,7 +69,11 @@ AMainCharacter::AMainCharacter() :
 	/* Interactions */ 
 	InteractionCheckFrequency = 0.f;
 	InteractionCheckDistance = 50.f;
-
+	
+	// WingsFlipbook->AddLocalTransform( );
+	// WingsFlipbook->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	// WingsFlipbook->SetVisibility(true);
+	// WingsFlipbook->SetLooping(false)
 	
 }
 
@@ -202,6 +206,11 @@ void AMainCharacter::DoubleJump()
 
 		UGameplayStatics::PlaySound2D(GetWorld(), JumpSoundCue);
 	}
+	if (MaximumJumps > 1)
+	{
+		
+	}
+	UDebug::Print(WARNING, "Current Max Jumps: " + FString::FromInt(MaximumJumps));
 }
 
 void AMainCharacter::Landed(const FHitResult& Hit)
