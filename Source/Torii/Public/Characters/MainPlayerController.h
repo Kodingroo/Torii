@@ -18,11 +18,14 @@ class TORII_API AMainPlayerController : public APlayerController
 public:
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
 	void OpenMenu();
 
 	void GainedDash();
 
 	void CollectedFeathers();
+
+	virtual void SetupInputComponent() override;
 	
 private:
 	UPROPERTY(EditAnywhere, Category="Widgets")

@@ -24,11 +24,11 @@ AFeather::AFeather() :
 	SetActorRelativeScale3D(FeatherSize);
 
 	/* Load Sound Cue */
-	static ConstructorHelpers::FObjectFinder<USoundCue> FeatherSoundCueObject(TEXT("SoundCue'/Game/SoundAssets/SC_Feather.SC_Feather'"));
-	if (FeatherSoundCueObject.Succeeded())
-	{
-		FeatherSoundCue = FeatherSoundCueObject.Object;
-	}
+	// static ConstructorHelpers::FObjectFinder<USoundCue> FeatherSoundCueObject(TEXT("SoundCue'/Game/SoundAssets/SC_Feather.SC_Feather'"));
+	// if (FeatherSoundCueObject.Succeeded())
+	// {
+	// 	FeatherSoundCue = FeatherSoundCueObject.Object;
+	// }
 }
 
 void AFeather::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,

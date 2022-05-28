@@ -93,6 +93,12 @@ public:
 
 	void Interact();
 
+	UFUNCTION()
+	void OpenMenu();
+
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UUserWidget> MainMenuWidget;
+
 	//Information about the current state of the players interaction
 	UPROPERTY()
 	FInteractionData InteractionData;

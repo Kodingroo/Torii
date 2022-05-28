@@ -13,12 +13,23 @@ void AMainPlayerController::BeginPlay()
 	
 }
 
+void AMainPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	if (InputComponent)
+	{
+		InputComponent->BindAction("OpenMenu", IE_Pressed, this, &AMainPlayerController::OpenMenu);
+	}
+}
+
 void AMainPlayerController::OpenMenu()
 {
+	UDebug::Print(WARNING, "Open MEnu in Controller ");
+
 	UUserWidget* MainMenu = CreateWidget(this, MainMenuWidget);
 	if (MainMenu != nullptr)
 	{
-		UDebug::Print(WARNING, "MainMenu loaded");
 		MainMenu->AddToViewport();
 	}
 }
@@ -30,3 +41,4 @@ void AMainPlayerController::GainedDash()
 void AMainPlayerController::CollectedFeathers()
 {
 }
+

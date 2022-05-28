@@ -4,12 +4,15 @@
 
 #include "DrawDebugHelpers.h"
 #include "PaperFlipbookComponent.h"
+#include "Characters/MainPlayerController.h"
 #include "Components/TextRenderComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "Core/Debug.h"
+#include "Core/ToriiGameMode.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
+#include "GameFramework/GameModeBase.h"
 #include "Gameplay/Components/InteractionComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -145,6 +148,22 @@ void AMainCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInpu
 
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AMainCharacter::BeginInteract);
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AMainCharacter::EndInteract);
+	PlayerInputComponent->BindAction("OpenMenu", IE_Pressed, this, &AMainCharacter::OpenMenu);
+}
+
+void AMainCharacter::OpenMenu()
+{
+	if (MainMenuWidget)
+	{
+		UUserWidget* MMW = Cast<UUserWidget>(CreateWidget(GetWorld(), MainMenuWidget));
+		if (MMW)
+		{
+			MMW->AddToViewport();
+
+			AMainPlayerController* PC = Cast<AMainPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)); 
+			PC->bShowMouseCursor;
+		}
+	}
 }
 
 void AMainCharacter::DoubleJump()

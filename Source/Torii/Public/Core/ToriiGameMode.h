@@ -19,7 +19,16 @@ public:
 
 	virtual void StartPlay() override;
 
+	UFUNCTION()
+	void OpenMenu();
+	
 private:
 	void SetupPlayer();
+
+protected:
+	virtual void BeginPlay() override;
 	
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UUserWidget> MainMenuWidget;
+	UUserWidget* MMW;
 };
