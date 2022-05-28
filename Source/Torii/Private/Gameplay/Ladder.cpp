@@ -17,6 +17,7 @@ ALadder::ALadder() :
 	PrimaryActorTick.bCanEverTick = true;
 
 	CollisionVolume = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionVolume"));
+	CollisionVolume->SetRelativeScale3D(FVector(16.f, 0.f, 48.f));
 	RootComponent = CollisionVolume;
 
 }
@@ -49,7 +50,6 @@ void ALadder::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 {
 	Player->OnLadder = false;
 	Player->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-
 }
 
 
