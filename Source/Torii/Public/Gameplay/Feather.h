@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "PaperFlipbook.h"
 #include "PaperFlipbookComponent.h"
-#include "PaperSpriteComponent.h"
 #include "Gameplay/PickUp.h"
 #include "Sound/SoundCue.h"
 #include "Feather.generated.h"

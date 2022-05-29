@@ -25,7 +25,8 @@ AMainCharacter::AMainCharacter() :
 	DashDistance(2000.f),
 	HitObjectDirection(0.f),
 	IsWallSliding(false),
-	OnLadder(false)
+	OnLadder(false),
+	OverlapLamp(false)
 {
 	// Use only Yaw from the controller and ignore the rest of the rotation.
 	bUseControllerRotationPitch = false;
@@ -68,7 +69,7 @@ AMainCharacter::AMainCharacter() :
 
 	/* Interactions */ 
 	InteractionCheckFrequency = 0.f;
-	InteractionCheckDistance = 50.f;
+	InteractionCheckDistance = 20.f;
 	
 	// WingsFlipbook->AddLocalTransform( );
 	// WingsFlipbook->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
@@ -364,11 +365,14 @@ void AMainCharacter::PerformInteractionCheck()
 
 	if (GetWorld()->LineTraceSingleByChannel(TraceHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
 	{
+		UDebug::Print(WARNING, "Found Actor");
 		//Check if we hit an interactable object
 		if (TraceHit.GetActor())
 		{
 			if (UInteractionComponent* InteractionComponent = Cast<UInteractionComponent>(TraceHit.GetActor()->GetComponentByClass(UInteractionComponent::StaticClass())))
 			{
+				UDebug::Print(WARNING, "Found an Interactable Actor");
+
 				float Distance = (TraceStart - TraceHit.ImpactPoint).Size();
 				if (InteractionComponent != GetInteractable() && Distance <= InteractionComponent->InteractionDistance)
 				{
@@ -431,6 +435,8 @@ void AMainCharacter::FoundNewInteractable(UInteractionComponent* Interactable)
 
 void AMainCharacter::BeginInteract()
 {
+	UDebug::Print(WARNING, "Interact");		
+
 	if (!HasAuthority())
 	{
 		ServerBeginInteract();
@@ -449,6 +455,7 @@ void AMainCharacter::BeginInteract()
 	if (UInteractionComponent* Interactable = GetInteractable())
 	{
 		Interactable->BeginInteract(this);
+		UDebug::Print(ERROR, "Begin Interact");
 
 		if (FMath::IsNearlyZero(Interactable->InteractionTime))
 		{

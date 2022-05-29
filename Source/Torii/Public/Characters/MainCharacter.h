@@ -55,6 +55,12 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wings")
 	UWingsFlipbookComponent* WingsFlipbook;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wings")
+	bool FirstJump;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lamp")
+	bool OverlapLamp;
 
 	virtual void Tick(float DeltaSeconds) override;
 
