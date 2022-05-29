@@ -16,7 +16,7 @@ ULerpingComponent::ULerpingComponent()
 
 	/* Variables for True Lerp */ 
 	LerpDuration = 3;
-	WaitTime = 0;
+	WaitTime = 2;
 }
 
 void ULerpingComponent::BeginPlay()
@@ -25,7 +25,7 @@ void ULerpingComponent::BeginPlay()
 
 	/* Set variables for Sin */ 
 	BaseZLocation = Parent->GetActorLocation().Z;
-	Amplitude = 500.f;
+	Amplitude = 150.f;
 	Period = 2.f;
 	PhaseShift = 1.f;
 	VerticalShift = 1.f;

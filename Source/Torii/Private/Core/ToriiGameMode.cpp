@@ -22,7 +22,7 @@ void AToriiGameMode::StartPlay()
 
 	Super::StartPlay();
 	
-	InitCoinCollectedEvent();
+	InitFeatherCollectedEvent();
 }
 
 void AToriiGameMode::SetupPlayer()
@@ -56,7 +56,7 @@ void AToriiGameMode::OpenMenu()
 }
 
 
-void AToriiGameMode::InitCoinCollectedEvent() const
+void AToriiGameMode::InitFeatherCollectedEvent() const
 {
 	AMainPlayerController* PlayerController = Cast<AMainPlayerController>(UGameplayStatics::GetPlayerController(GEngine->GameViewport->GetWorld(), 0));
 

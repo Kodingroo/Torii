@@ -23,7 +23,7 @@ public:
 	void OpenMenu();
 
 	UFUNCTION(BlueprintCallable, Category="Initialize Level")
-	void InitCoinCollectedEvent() const;
+	void InitFeatherCollectedEvent() const;
 	
 private:
 	void SetupPlayer();
