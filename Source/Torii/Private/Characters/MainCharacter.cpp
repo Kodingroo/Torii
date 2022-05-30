@@ -487,7 +487,7 @@ void AMainCharacter::EndInteract()
 
 void AMainCharacter::Interact()
 {
-	GEngine->AddOnScreenDebugMessage(-5, 2, FColor::Red, TEXT("HIT THE OBJECT"));
+	// GEngine->AddOnScreenDebugMessage(-5, 2, FColor::Red, TEXT("HIT THE OBJECT"));
 	UE_LOG(LogTemp, Warning, TEXT("Found an interactable object!"));
 
 	GetWorldTimerManager().ClearTimer(TimerHandle_Interact);
@@ -495,7 +495,7 @@ void AMainCharacter::Interact()
 	if (UInteractionComponent* Interactable = GetInteractable())
 	{
 		Interactable->Interact(this);
-		GEngine->AddOnScreenDebugMessage(-5, 2, FColor::Red, TEXT("HIT THE OBJECT"));
+		// GEngine->AddOnScreenDebugMessage(-5, 2, FColor::Red, TEXT("HIT THE OBJECT"));
 	}
 }
 
