@@ -1,4 +1,4 @@
-// Copyright Isaac Lloyd Hayward. All Rights Reserved.
+/* TORII: Pixel 2D Platformer - GAMEDEV.TV Game Jam Project - Copyright Isaac Hayward 2022 */
 
 #include "Characters/MainCharacter.h"
 
@@ -211,7 +211,7 @@ void AMainCharacter::DoubleJump()
 	{
 		
 	}
-	UDebug::Print(WARNING, "Current Max Jumps: " + FString::FromInt(MaximumJumps));
+	// UDebug::Print(WARNING, "Current Max Jumps: " + FString::FromInt(MaximumJumps));
 }
 
 void AMainCharacter::Landed(const FHitResult& Hit)
@@ -365,13 +365,13 @@ void AMainCharacter::PerformInteractionCheck()
 
 	if (GetWorld()->LineTraceSingleByChannel(TraceHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
 	{
-		UDebug::Print(WARNING, "Found Actor");
+		// UDebug::Print(WARNING, "Found Actor");
 		//Check if we hit an interactable object
 		if (TraceHit.GetActor())
 		{
 			if (UInteractionComponent* InteractionComponent = Cast<UInteractionComponent>(TraceHit.GetActor()->GetComponentByClass(UInteractionComponent::StaticClass())))
 			{
-				UDebug::Print(WARNING, "Found an Interactable Actor");
+				// UDebug::Print(WARNING, "Found an Interactable Actor");
 
 				float Distance = (TraceStart - TraceHit.ImpactPoint).Size();
 				if (InteractionComponent != GetInteractable() && Distance <= InteractionComponent->InteractionDistance)
@@ -435,7 +435,7 @@ void AMainCharacter::FoundNewInteractable(UInteractionComponent* Interactable)
 
 void AMainCharacter::BeginInteract()
 {
-	UDebug::Print(WARNING, "Interact");		
+	// UDebug::Print(WARNING, "Interact");		
 
 	if (!HasAuthority())
 	{
@@ -455,7 +455,7 @@ void AMainCharacter::BeginInteract()
 	if (UInteractionComponent* Interactable = GetInteractable())
 	{
 		Interactable->BeginInteract(this);
-		UDebug::Print(ERROR, "Begin Interact");
+		// UDebug::Print(ERROR, "Begin Interact");
 
 		if (FMath::IsNearlyZero(Interactable->InteractionTime))
 		{

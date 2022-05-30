@@ -1,11 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+/* TORII: Pixel 2D Platformer - GAMEDEV.TV Game Jam Project - Copyright Isaac Hayward 2022 */
 
 #include "Gameplay/PickUp.h"
-
-
-#include "Core/Debug.h"
-
 
 APickUp::APickUp() 
 {

@@ -1,4 +1,4 @@
-//Isaac Lloyd Hayward - GameDevTV GameJam 2022
+/* TORII: Pixel 2D Platformer - GAMEDEV.TV Game Jam Project - Copyright Isaac Hayward 2022 */
 
 #pragma once
 
