@@ -7,6 +7,7 @@
 
 #include "MainPlayerController.generated.h"
 
+class AToriiGameMode;
 /**
  * 
  */
@@ -31,7 +32,8 @@ public:
 	int TotalFeathers;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Feather Properties")
 	int CollectedFeathers;
-	
+
+
 	virtual void SetupInputComponent() override;
 	
 private:
@@ -41,4 +43,7 @@ private:
 	TSubclassOf<AActor> FeatherClassRef;
 	UPROPERTY(VisibleAnywhere, Category="Coin Array")
 	TArray<AActor*> FoundFeathersInLevel;
+
+	UPROPERTY(VisibleAnywhere, Category="References")
+	AToriiGameMode* GameModeRef;
 };

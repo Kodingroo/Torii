@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "ToriiGameMode.generated.h"
 
+class AMainPlayerController;
 /**
  * 
  */
@@ -24,7 +25,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Initialize Level")
 	void InitFeatherCollectedEvent() const;
-	
+
+	UFUNCTION(BlueprintCallable, Category="Collected Feathers")
+	void DisplayCollectedFeathersWidget();
+	void DisplayDoubleJumpWidget();
+
 private:
 	void SetupPlayer();
 
@@ -33,5 +38,20 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TSubclassOf<UUserWidget> MainMenuWidget;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Widgets")
 	UUserWidget* MMW;
+
+	UPROPERTY(VisibleAnywhere, Category="References")
+	AMainPlayerController* MainPlayerController;
+		
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UUserWidget> CollectFeatherWidget;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Widgets")
+	UUserWidget* CFW;
+
+			
+	UPROPERTY(EditAnywhere, Category="Widgets")
+	TSubclassOf<UUserWidget> DoubeJumpWidget;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Widgets")
+	UUserWidget* DJW;
 };

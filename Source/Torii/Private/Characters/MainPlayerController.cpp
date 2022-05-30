@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Characters/MainCharacter.h"
 #include "Core/Debug.h"
+#include "Core/ToriiGameMode.h"
 #include "Gameplay/Feather.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -20,7 +21,8 @@ AMainPlayerController::AMainPlayerController() :
 void AMainPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	GameModeRef = Cast<AToriiGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 }
 
 void AMainPlayerController::SetupInputComponent()
@@ -78,10 +80,16 @@ void AMainPlayerController::ObserveFeatherCollected(bool bFeatherCollected)
 
 	CollectedFeathers++;
 
-	if (CollectedFeathers == TotalFeathers)
+	if (GameModeRef && CollectedFeathers == TotalFeathers)
 	{
 		UDebug::Print(WARNING, "All Feathers Found");
 		AMainCharacter* Main = Cast<AMainCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-		Main->MaximumJumps = 2; 
+		Main->MaximumJumps = 2;
+
+		GameModeRef->DisplayDoubleJumpWidget();
+	}
+	else if (GameModeRef && CollectedFeathers != TotalFeathers)
+	{
+		GameModeRef->DisplayCollectedFeathersWidget();
 	}
 }

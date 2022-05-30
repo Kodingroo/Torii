@@ -39,6 +39,12 @@ void AToriiGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	OpenMenu();
+
+	MainPlayerController = Cast<AMainPlayerController>(UGameplayStatics::GetPlayerController(GEngine->GameViewport->GetWorld(), 0));
+
+	/* Must create reference to Widgets in BeginPlay to avoid unexpected behavior */ 
+	CFW = Cast<UUserWidget>(CreateWidget(GetWorld(), CollectFeatherWidget));
+	DJW = Cast<UUserWidget>(CreateWidget(GetWorld(), DoubeJumpWidget));
 }
 
 void AToriiGameMode::OpenMenu()
@@ -49,8 +55,11 @@ void AToriiGameMode::OpenMenu()
 		if (MMW)
 		{
 			MMW->AddToViewport();
-			AMainPlayerController* PC = Cast<AMainPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)); 
-			PC->bShowMouseCursor = true;
+
+			if (MainPlayerController)
+			{
+				MainPlayerController->bShowMouseCursor = true;
+			}
 		}
 	}
 }
@@ -58,11 +67,40 @@ void AToriiGameMode::OpenMenu()
 
 void AToriiGameMode::InitFeatherCollectedEvent() const
 {
-	AMainPlayerController* PlayerController = Cast<AMainPlayerController>(UGameplayStatics::GetPlayerController(GEngine->GameViewport->GetWorld(), 0));
-
-	if (PlayerController)
+	if (MainPlayerController)
 	{
-		PlayerController->BindFeatherCollectedEvent();
+		UDebug::Print(WARNING, "You collected a feather");
+		MainPlayerController->BindFeatherCollectedEvent();
 	}    
 }
 
+
+void AToriiGameMode::DisplayCollectedFeathersWidget()
+{
+	if (!MainPlayerController)
+	{
+		return;
+	}
+	
+	if (CFW && MainPlayerController->TotalFeathers != MainPlayerController->CollectedFeathers)
+	{
+		CFW->AddToViewport();
+		MainPlayerController->bShowMouseCursor = true;
+		UDebug::Print(WARNING, "DisplayCollectedFeathersWidget");
+	}
+}
+
+void AToriiGameMode::DisplayDoubleJumpWidget()
+{
+	if (!MainPlayerController)
+	{
+		return;
+	}
+	
+	if (DJW && MainPlayerController->TotalFeathers == MainPlayerController->CollectedFeathers)
+	{
+		DJW->AddToViewport();
+		CFW->RemoveFromParent();
+		MainPlayerController->bShowMouseCursor = true;
+	}
+}
