@@ -228,15 +228,9 @@ void AMainCharacter::Landed(const FHitResult& Hit)
 void AMainCharacter::MoveRight(float Value)
 {
 	/*UpdateChar();*/
-
-	if (!OnLadder)
-	{
+	
 	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
-	}
-	else
-	{
-		AddMovementInput(FVector(0.0f));
-	}
+		
 	// Apply the input to the character motion
 
 	WallSlide(Value);
@@ -322,7 +316,7 @@ void AMainCharacter::WallSlide(float Value)
 		HitObjectDirection = WallSlideTraceHit.Location.X;
 		//Check if we hit an interactable object
 
-		if (WallSlideTraceHit.GetActor())
+		if (WallSlideTraceHit.GetActor() && !WallSlideTraceHit.GetActor()->GetName().Contains("Lamp"))
 		{
 			if (GetCharacterMovement()->IsFalling() && GetCharacterMovement()->Velocity.Z < 0 && Value != 0)
 			{
