@@ -228,13 +228,14 @@ void AMainCharacter::WallSlide(float Value)
 
 void AMainCharacter::UpdateCharacter()
 {
-	// Update animation to match the motion
+	/* Update animation to match the motion */
 	UpdateAnimation();
 
-	// Now setup the rotation of the controller based on the direction we are travelling
-	const FVector PlayerVelocity = GetVelocity();	
-	float TravelDirection = PlayerVelocity.X;
-	// Set the rotation so that the character faces his direction of travel.
+	/* Setup the rotation of the controller based on the direction we are travelling */
+	const FVector PlayerVelocity = GetVelocity();
+	const float TravelDirection = PlayerVelocity.X;
+	
+	/* Set the rotation so that the character faces his direction of travel. */
 	if (Controller != nullptr)
 	{
 		if (TravelDirection < 0.0f)
@@ -463,15 +464,20 @@ void AMainCharacter::UpdateAnimation()
 	const FVector PlayerVelocity = GetVelocity();
 	const float PlayerSpeedSqr = PlayerVelocity.SizeSquared();
 
-	// Are we moving or standing still?
+	/*  Is the character moving or standing still? */
 	UPaperFlipbook* DesiredAnimation = (PlayerSpeedSqr > 0.0f) ? RunningAnimation : IdleAnimation;
 	
 	if( GetSprite()->GetFlipbook() != DesiredAnimation && !GetCharacterMovement()->IsFalling())
 	{
 		GetSprite()->SetFlipbook(DesiredAnimation);
 	}
-	else if( GetCharacterMovement()->IsFalling())
+	else if( GetCharacterMovement()->IsFalling() && !IsWallSliding )
 	{
 		GetSprite()->SetFlipbook(JumpingAnimation);
 	}
+	else if( GetCharacterMovement()->IsFalling() && IsWallSliding )
+	{
+		GetSprite()->SetFlipbook(SlidingAnimation);
+	}
+	
 }

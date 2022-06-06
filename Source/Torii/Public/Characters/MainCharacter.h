@@ -167,6 +167,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
 	UPaperFlipbook* WingsAnimation;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
+	UPaperFlipbook* SlidingAnimation;
+	
 
 	/** Called to choose the correct animation to play based on the character's movement state */
 	void UpdateAnimation();
