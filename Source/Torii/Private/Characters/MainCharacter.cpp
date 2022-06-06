@@ -14,7 +14,7 @@
 #include "Gameplay/Components/InteractionComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-DEFINE_LOG_CATEGORY_STATIC(SideScrollerCharacter, Log, All);
+// DEFINE_LOG_CATEGORY_STATIC(SideScrollerCharacter, Log, All);
 
 
 AMainCharacter::AMainCharacter() :
@@ -28,18 +28,18 @@ AMainCharacter::AMainCharacter() :
 	OnLadder(false),
 	OverlapLamp(false)
 {
-	// Use only Yaw from the controller and ignore the rest of the rotation.
+	/* Use only Yaw from the controller and ignore the rest of the rotation. */
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
 	bUseControllerRotationRoll = false;
 
-	// Set the size of our collision capsule.
+	/* Set the size of the collision capsule. */
 	GetCapsuleComponent()->SetCapsuleHalfHeight(96.0f);
 	GetCapsuleComponent()->SetCapsuleRadius(40.0f);
 	
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 
-	// Configure character movement
+	/* Configure character movement */
 	GetCharacterMovement()->GravityScale = 2.0f;
 	GetCharacterMovement()->AirControl = 0.80f;
 	GetCharacterMovement()->JumpZVelocity = 700.f;
@@ -48,7 +48,7 @@ AMainCharacter::AMainCharacter() :
 	GetCharacterMovement()->MaxFlySpeed = 600.0f;
 	GetCharacterMovement()->AirControl = 0.5f;
 
-	// Lock character motion onto the XZ plane, so the character can't move in or out of the screen
+	/* Lock character motion onto the XZ plane */
 	GetCharacterMovement()->bConstrainToPlane = true;
 	GetCharacterMovement()->SetPlaneConstraintNormal(FVector(0.0f, -1.0f, 0.0f));
 
@@ -57,103 +57,67 @@ AMainCharacter::AMainCharacter() :
 	// behavior on the edge of a ledge versus inclines by setting this to true or false
 	GetCharacterMovement()->bUseFlatBaseForFloorChecks = true;
 
-    // 	TextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("IncarGear"));
-    // 	TextComponent->SetRelativeScale3D(FVector(3.0f, 3.0f, 3.0f));
-    // 	TextComponent->SetRelativeLocation(FVector(35.0f, 5.0f, 20.0f));
-    // 	TextComponent->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
-    // 	TextComponent->SetupAttachment(RootComponent);
-
-	// Enable replication on the Sprite component so animations show up when networked
+	/* Enable replication on the Sprite component so animations show up when networked */
 	GetSprite()->SetIsReplicated(true);
 	bReplicates = true;
 
-	/* Interactions */ 
+	/* Set how often and at what distance the Player Character should check for Scene objects with Interactive Components attached */ 
 	InteractionCheckFrequency = 0.f;
 	InteractionCheckDistance = 20.f;
 	
-	// WingsFlipbook->AddLocalTransform( );
-	// WingsFlipbook->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	// WingsFlipbook->SetVisibility(true);
-	// WingsFlipbook->SetLooping(false)
-	
-}
-
-//////////////////////////////////////////////////////////////////////////
-// Animation
-
-void AMainCharacter::Squish(float ModWidth, float ModHeight, float SquishDuration)
-{
-	if (GetCharacterMovement()->IsFalling() && !GetCharacterMovement()->GroundFriction)
-	{
-		GetSprite()->SetRelativeScale3D(FVector(StartWidth + ModWidth, 0.f, StartHeight + ModHeight));
-	}
-	else
-		{
-			GetSprite()->SetRelativeScale3D(FVector(StartWidth + ModWidth, 0.f, StartHeight + ModHeight));
-			GetWorld()->GetTimerManager().SetTimer(SquishHandle, [&]()
-			{
-				GetSprite()->SetRelativeScale3D(FVector(StartWidth, 0.f, StartHeight));
-			}, SquishDuration, false);	
-		}
 }
 
 void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	/* Starting Scale values are assigned here for use with the Squish Animation effect */
 	StartWidth = GetSprite()->GetRelativeScale3D().X;
 	StartHeight = GetSprite()->GetRelativeScale3D().Z;
-}
-
-void AMainCharacter::UpdateAnimation()
-{
-	const FVector PlayerVelocity = GetVelocity();
-	const float PlayerSpeedSqr = PlayerVelocity.SizeSquared();
-
-	// Are we moving or standing still?
-	UPaperFlipbook* DesiredAnimation = (PlayerSpeedSqr > 0.0f) ? RunningAnimation : IdleAnimation;
-	
-	if( GetSprite()->GetFlipbook() != DesiredAnimation && !GetCharacterMovement()->IsFalling())
-	{
-		GetSprite()->SetFlipbook(DesiredAnimation);
-	}
-	else if( GetCharacterMovement()->IsFalling())
-	{
-		GetSprite()->SetFlipbook(JumpingAnimation);
-	}
 }
 
 void AMainCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	
-	UpdateCharacter();
 
+	/* Updating the animation of the Character as well as i's facing direction */
+	UpdateCharacter();
+	
 	if (GetWorld()->TimeSince(InteractionData.LastInteractionCheckTime) > InteractionCheckFrequency)
 	{
 		PerformInteractionCheck();
 	}
-
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-// Input
+// -------------------- INPUT -------------------- //
 
 void AMainCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
-	// Note: the 'Jump' action and the 'MoveRight' axis are bound to actual keys/buttons/sticks in DefaultInput.ini (editable from Project Settings..Input)
+	/* Note: the 'Jump' action and the 'MoveRight' axis are bound to actual keys/buttons/sticks in DefaultInput.ini (editable from Project Settings..Input) */
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AMainCharacter::DoubleJump);
-	// PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMainCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMainCharacter::MoveForward);
-
-	PlayerInputComponent->BindTouch(IE_Pressed, this, &AMainCharacter::TouchStarted);
-	PlayerInputComponent->BindTouch(IE_Released, this, &AMainCharacter::TouchStopped);
 
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AMainCharacter::BeginInteract);
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AMainCharacter::EndInteract);
 	PlayerInputComponent->BindAction("OpenMenu", IE_Pressed, this, &AMainCharacter::OpenMenu);
+}
+
+void AMainCharacter::MoveRight(float Value)
+{
+	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
+
+	WallSlide(Value);
+}
+
+
+void AMainCharacter::MoveForward(float Value)
+{
+	if(OnLadder)
+	{
+		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		AddMovementInput(GetSprite()->GetUpVector(), Value);
+	}
 }
 
 void AMainCharacter::OpenMenu()
@@ -170,6 +134,8 @@ void AMainCharacter::OpenMenu()
 		}
 	}
 }
+
+// -------------------- CHARACTER MOVEMENT -------------------- //
 
 void AMainCharacter::DoubleJump()
 {
@@ -225,38 +191,39 @@ void AMainCharacter::Landed(const FHitResult& Hit)
 	DashCounter = 0;
 }
 
-void AMainCharacter::MoveRight(float Value)
+void AMainCharacter::WallSlide(float Value)
 {
-	/*UpdateChar();*/
+	FVector EyesLoc;
+	FRotator EyesRot;
+	FHitResult WallSlideTraceHit;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+
+	/* It's important to use ActorEyesViewpoint and not PlayerViewPoint as the character itself needs to find Interactable objects from its perspective */ 
+	GetController()->GetActorEyesViewPoint(EyesLoc, EyesRot);
+
+	FVector TraceStart = EyesLoc + FVector(0.f, 0.f,-50.f);;
+	FVector TraceEnd = (EyesRot.Vector() * 16.f) + TraceStart;
+
+	/* Used to see Interaction Distance */ 
+	// DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red );
 	
-	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
-		
-	// Apply the input to the character motion
-
-	WallSlide(Value);
-}
-
-
-void AMainCharacter::MoveForward(float Value)
-{
-	if(OnLadder)
+	if (GetWorld()->LineTraceSingleByChannel(WallSlideTraceHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
 	{
-		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-		AddMovementInput(GetSprite()->GetUpVector(), Value);
+		if (WallSlideTraceHit.GetActor() && !WallSlideTraceHit.GetActor()->GetName().Contains("Lamp")
+			&& GetCharacterMovement()->IsFalling() && GetCharacterMovement()->Velocity.Z < 0 && Value != 0)
+		{
+			IsWallSliding = true;
+
+			WallSlideDirection = WallSlideTraceHit.GetActor()->GetActorRotation().Yaw;
+				
+			GetCharacterMovement()->Velocity = FVector(0.f,0.f,-100.f);
+		}
 	}
-}
-
-
-void AMainCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	// Jump on any touch
-	Jump();
-}
-
-void AMainCharacter::TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	// Cease jumping once touch stopped
-	StopJumping();
+	else
+	{
+		IsWallSliding = false;
+	}
 }
 
 void AMainCharacter::UpdateCharacter()
@@ -291,46 +258,6 @@ bool AMainCharacter::IsInteracting() const
 float AMainCharacter::GetRemainingInteractTime() const
 {
 	return GetWorldTimerManager().GetTimerRemaining(TimerHandle_Interact);
-}
-
-void AMainCharacter::WallSlide(float Value)
-{
-	FVector EyesLoc;
-	FRotator EyesRot;
-	FHitResult WallSlideTraceHit;
-
-	GetController()->GetActorEyesViewPoint(EyesLoc, EyesRot);
-
-	FVector TraceStart = EyesLoc + FVector(0.f, 0.f,-50.f);;
-	FVector TraceEnd = (EyesRot.Vector() * 16.f) + TraceStart;
-	
-	// DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red );
-
-	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(this);
-
-	IsWallSliding = false;
-	
-	if (GetWorld()->LineTraceSingleByChannel(WallSlideTraceHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
-	{
-		HitObjectDirection = WallSlideTraceHit.Location.X;
-		//Check if we hit an interactable object
-
-		if (WallSlideTraceHit.GetActor() && !WallSlideTraceHit.GetActor()->GetName().Contains("Lamp"))
-		{
-			if (GetCharacterMovement()->IsFalling() && GetCharacterMovement()->Velocity.Z < 0 && Value != 0)
-			{
-				IsWallSliding = true;
-				// GEngine->AddOnScreenDebugMessage(-5, 5.f, FColor::Red,
-				// 				 FString::Printf(TEXT("Left Wall Returns: %f"),
-				// 					 GetSprite()->GetForwardVector().X));
-				//
-				WallSlideDirection = WallSlideTraceHit.GetActor()->GetActorRotation().Yaw;
-				
-				GetCharacterMovement()->Velocity = FVector(0.f,0.f,-100.f);
-			}
-		}
-	}
 }
 
 void AMainCharacter::PerformInteractionCheck()
@@ -511,4 +438,40 @@ void AMainCharacter::ServerBeginInteract_Implementation()
 bool AMainCharacter::ServerBeginInteract_Validate()
 {
 	return true;
+}
+
+// -------------------- ANIMATION -------------------- //
+
+void AMainCharacter::Squish(float ModWidth, float ModHeight, float SquishDuration)
+{
+	if (GetCharacterMovement()->IsFalling() && !GetCharacterMovement()->GroundFriction)
+	{
+		GetSprite()->SetRelativeScale3D(FVector(StartWidth + ModWidth, 0.f, StartHeight + ModHeight));
+	}
+	else
+	{
+		GetSprite()->SetRelativeScale3D(FVector(StartWidth + ModWidth, 0.f, StartHeight + ModHeight));
+		GetWorld()->GetTimerManager().SetTimer(SquishHandle, [&]()
+		{
+			GetSprite()->SetRelativeScale3D(FVector(StartWidth, 0.f, StartHeight));
+		}, SquishDuration, false);	
+	}
+}
+
+void AMainCharacter::UpdateAnimation()
+{
+	const FVector PlayerVelocity = GetVelocity();
+	const float PlayerSpeedSqr = PlayerVelocity.SizeSquared();
+
+	// Are we moving or standing still?
+	UPaperFlipbook* DesiredAnimation = (PlayerSpeedSqr > 0.0f) ? RunningAnimation : IdleAnimation;
+	
+	if( GetSprite()->GetFlipbook() != DesiredAnimation && !GetCharacterMovement()->IsFalling())
+	{
+		GetSprite()->SetFlipbook(DesiredAnimation);
+	}
+	else if( GetCharacterMovement()->IsFalling())
+	{
+		GetSprite()->SetFlipbook(JumpingAnimation);
+	}
 }
