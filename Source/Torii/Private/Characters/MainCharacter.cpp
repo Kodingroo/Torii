@@ -26,7 +26,8 @@ AMainCharacter::AMainCharacter() :
 	HitObjectDirection(0.f),
 	IsWallSliding(false),
 	OnLadder(false),
-	OverlapLamp(false)
+	OverlapLamp(false),
+	WallSlideCheck(false)
 {
 	/* Use only Yaw from the controller and ignore the rest of the rotation. */
 	bUseControllerRotationPitch = false;
@@ -105,11 +106,31 @@ void AMainCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInpu
 
 void AMainCharacter::MoveRight(float Value)
 {
-	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
-
 	WallSlide(Value);
+	
+	if( !GetCharacterMovement()->IsFalling() || !IsWallSliding )
+	{
+		WallSlideCheck = false; 
+		AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
+	}
+	else if( IsWallSliding && WallSlideCheck == false)
+	{
+		WallSlideCheck = true;
+		GetWorld()->GetTimerManager().ClearTimer(WallSlidingHandle);
+		const float FacingValue = GetSprite()->GetForwardVector().X ? 1.f : -1.f;
+		const FTimerDelegate SlidingDelegate = FTimerDelegate::CreateUObject( this, &AMainCharacter::RightInput, FacingValue );
+		GetWorld()->GetTimerManager().SetTimer(WallSlidingHandle, SlidingDelegate, .6f, true);
+		// GetWorld()->GetTimerManager().SetTimer(WallSlidingHandle, [&]()
+		// {
+		// 	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), FacingValue);
+		// }, .7f, false);
+	}
 }
 
+void AMainCharacter::RightInput(float Value)
+{
+	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
+}
 
 void AMainCharacter::MoveForward(float Value)
 {
@@ -124,13 +145,13 @@ void AMainCharacter::OpenMenu()
 {
 	if (MainMenuWidget)
 	{
-		UUserWidget* MMW = Cast<UUserWidget>(CreateWidget(GetWorld(), MainMenuWidget));
-		if (MMW)
+		UUserWidget* MainMenu = Cast<UUserWidget>(CreateWidget(GetWorld(), MainMenuWidget));
+		if (MainMenu)
 		{
-			MMW->AddToViewport();
+			MainMenu->AddToViewport();
 
-			AMainPlayerController* PC = Cast<AMainPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)); 
-			PC->bShowMouseCursor;
+			PlayerController = Cast<AMainPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)); 
+			PlayerController->bShowMouseCursor;
 		}
 	}
 }
@@ -142,12 +163,11 @@ void AMainCharacter::DoubleJump()
 	Squish(-.2, .2, .2);
 
 	float JumpZ = GetCharacterMovement()->JumpZVelocity;
-
-	UE_LOG(LogTemp, Warning, TEXT("Found Wall!"));
+	
 	if (GetCharacterMovement()->IsFalling() && IsWallSliding)
 	{
-			float AddedForce = -2;
-			float OppositeFacingDirection = 0;
+			const float AddedForce = -2;
+			OppositeFacingDirection = 0;
 			if (GetSprite()->GetForwardVector().X < 0)
 			{
 				OppositeFacingDirection = GetActorRotation().Yaw  ;
@@ -160,13 +180,10 @@ void AMainCharacter::DoubleJump()
 			}
 			
 			IsWallSliding = false;
-
-				// GEngine->AddOnScreenDebugMessage(-5, 5.f, FColor::Red,
-				// 				 FString::Printf(TEXT("Wall Returns: %f"),
-				// 					 GetSprite()->GetForwardVector().X ));
+		
 		UGameplayStatics::PlaySound2D(GetWorld(), JumpSoundCue);
 	}
-	else if (JumpCounter < MaximumJumps && !IsWallSliding)
+	else if (JumpCounter < MaximumJumps)
 	{
 		ACharacter::LaunchCharacter(FVector(0.f,0.f,JumpZ), false,true);
 		JumpCounter++;
@@ -220,7 +237,7 @@ void AMainCharacter::WallSlide(float Value)
 			GetCharacterMovement()->Velocity = FVector(0.f,0.f,-100.f);
 		}
 	}
-	else
+	else if( WallSlideTraceHit.GetActor() == nullptr)
 	{
 		IsWallSliding = false;
 	}
@@ -449,7 +466,7 @@ void AMainCharacter::Squish(float ModWidth, float ModHeight, float SquishDuratio
 	{
 		GetSprite()->SetRelativeScale3D(FVector(StartWidth + ModWidth, 0.f, StartHeight + ModHeight));
 	}
-	else
+	else if ( GetCharacterMovement()->GroundFriction )
 	{
 		GetSprite()->SetRelativeScale3D(FVector(StartWidth + ModWidth, 0.f, StartHeight + ModHeight));
 		GetWorld()->GetTimerManager().SetTimer(SquishHandle, [&]()

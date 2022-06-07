@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MainPlayerController.h"
 #include "PaperCharacter.h"
 #include "Gameplay/ToriiCamera.h"
 #include "PaperFlipbook.h"
@@ -61,6 +62,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lamp")
 	bool OverlapLamp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Reference")
+	AMainPlayerController* PlayerController;
+	
+	bool WallSlideCheck;;
+	int OppositeFacingDirection;
+
 	virtual void Tick(float DeltaSeconds) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room Camera")
@@ -76,6 +83,7 @@ public:
 	/* Create squished animation quality for jumping */
 	void Squish(float ModWidth, float ModHeight, float SquishDuration );
 
+	FTimerHandle WallSlidingHandle;
 	FTimerHandle SquishHandle;
 
 	// ---------- INTERACTION ---------- //
@@ -176,6 +184,9 @@ protected:
 
 	/** Called for side to side input */
 	void MoveRight(float Value);
+
+	UFUNCTION()
+	void RightInput(float Value);
 
 	/** Called for up/down ladder input */
 	void MoveForward(float Value);
