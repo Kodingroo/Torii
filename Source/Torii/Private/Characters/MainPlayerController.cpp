@@ -14,7 +14,6 @@ AMainPlayerController::AMainPlayerController() :
 	TotalFeathers(0),
 	CollectedFeathers(0)
 {
-	
 }
 
 void AMainPlayerController::BeginPlay()
@@ -36,8 +35,6 @@ void AMainPlayerController::SetupInputComponent()
 
 void AMainPlayerController::OpenMenu()
 {
-	// UDebug::Print(WARNING, "Open Menu in Controller ");
-
 	UUserWidget* MainMenu = CreateWidget(this, MainMenuWidget);
 	if (MainMenu != nullptr)
 	{

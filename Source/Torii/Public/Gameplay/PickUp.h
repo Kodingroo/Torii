@@ -13,7 +13,4 @@ class TORII_API APickUp : public AItem
 	
 public:
 	APickUp();
-
-	virtual void Tick(float DeltaTime) override;
-	
 };

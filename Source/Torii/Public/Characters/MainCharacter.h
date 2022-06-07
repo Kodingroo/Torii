@@ -23,18 +23,17 @@ struct FInteractionData
 		bInteractHeld = false;
 	}
 
-	//The current interactable component we're viewing, if there is one
+	/* The current interactable component we're viewing, if there is one */
 	UPROPERTY()
 	class UInteractionComponent* ViewedInteractionComponent;
 
-	//The time when we last checked for an interactable
+	/* The time when we last checked for an interactable */
 	UPROPERTY()
 	float LastInteractionCheckTime;
 
-	//Whether the local player is holding the interact key
+	/* Whether the local player is holding the interact key */
 	UPROPERTY()
 	bool bInteractHeld;
-
 };
 
 UCLASS(config=Game)
@@ -52,22 +51,21 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Audio")
 	USoundBase* JumpSoundCue;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wings")
 	UWingsFlipbookComponent* WingsFlipbook;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wings")
 	bool FirstJump;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lamp")
 	bool OverlapLamp;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Reference")
 	AMainPlayerController* PlayerController;
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wall Slide")
 	bool WallSlideCheck;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wall Slide")
 	float DisengageSlidingTimer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wall Jump")
 	int WallJumpForce;;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wall Jump")
 	int OppositeFacingDirection;
 
 	virtual void Tick(float DeltaSeconds) override;
@@ -114,9 +112,6 @@ public:
 	void ServerEndInteract();
 
 	void Interact();
-
-	UFUNCTION()
-	void OpenMenu();
 
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TSubclassOf<UUserWidget> MainMenuWidget;

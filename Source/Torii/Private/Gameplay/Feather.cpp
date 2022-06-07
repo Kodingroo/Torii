@@ -15,16 +15,12 @@ AFeather::AFeather() :
 	FeatherSize(FVector(3.f))
 {
 	PrimaryActorTick.bCanEverTick = true;
-
-	// FeatherMesh = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Props/Feather/Meshes/SM_Pickup_Feather.SM_Pickup_Feather'")).Object;
-	// Mesh->SetStaticMesh(FeatherMesh);
-	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
+	
 	/* Rotation inherited from Pickup */
-	SetActorRelativeScale3D(FeatherSize);
 
+	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SetActorRelativeScale3D(FeatherSize);
 	FB_Feather = CreateDefaultSubobject<UPaperFlipbookComponent>(TEXT("FeatherFlipbook"));
-	// FB_Feather->AttachTo(RootComponent);
 }
 
 void AFeather::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,

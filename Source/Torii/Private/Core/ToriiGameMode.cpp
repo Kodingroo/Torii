@@ -13,7 +13,6 @@
 AToriiGameMode::AToriiGameMode()
 {
 	SetupPlayer();
-	
 }
 
 void AToriiGameMode::StartPlay()
@@ -68,7 +67,6 @@ void AToriiGameMode::InitFeatherCollectedEvent() const
 {
 	if (MainPlayerController)
 	{
-		// UDebug::Print(WARNING, "You collected a feather");
 		MainPlayerController->BindFeatherCollectedEvent();
 	}    
 }

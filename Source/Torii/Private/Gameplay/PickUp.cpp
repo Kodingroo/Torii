@@ -4,11 +4,6 @@
 
 APickUp::APickUp() 
 {
-	
-}
+	PrimaryActorTick.bCanEverTick = false;
 
-void APickUp::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	
 }

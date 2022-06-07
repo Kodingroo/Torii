@@ -60,7 +60,7 @@ bool UInteractionComponent::CanInteract(class AMainCharacter* Character) const
 
 void UInteractionComponent::RefreshWidget()
 {
-	//Make sure the widget is initialized, and that we are displaying the right values (these may have changed)
+	/* Make sure the widget is initialized, and that we are displaying the right values (these may have changed) */
 	if (UInteractionWidget* InteractionWidget = Cast<UInteractionWidget>(GetUserWidgetObject()))
 	{
 		InteractionWidget->UpdateInteractionWidget(this);

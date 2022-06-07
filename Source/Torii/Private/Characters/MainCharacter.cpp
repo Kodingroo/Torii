@@ -14,8 +14,6 @@
 #include "Gameplay/Components/InteractionComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-// DEFINE_LOG_CATEGORY_STATIC(SideScrollerCharacter, Log, All);
-
 
 AMainCharacter::AMainCharacter() :
 	JumpCounter(0),
@@ -107,7 +105,6 @@ void AMainCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInpu
 
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AMainCharacter::BeginInteract);
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AMainCharacter::EndInteract);
-	PlayerInputComponent->BindAction("OpenMenu", IE_Pressed, this, &AMainCharacter::OpenMenu);
 }
 
 void AMainCharacter::MoveRight(float Value)
@@ -154,21 +151,6 @@ void AMainCharacter::MoveForward(float Value)
 	}
 }
 
-void AMainCharacter::OpenMenu()
-{
-	/* Loaded on both game start and when pause button pressed */
-	if (MainMenuWidget)
-	{
-		UUserWidget* MainMenu = Cast<UUserWidget>(CreateWidget(GetWorld(), MainMenuWidget));
-		if (MainMenu)
-		{
-			MainMenu->AddToViewport();
-
-			PlayerController->bShowMouseCursor;
-		}
-	}
-}
-
 // -------------------- CHARACTER MOVEMENT -------------------- //
 
 void AMainCharacter::DoubleJump()
@@ -183,6 +165,7 @@ void AMainCharacter::DoubleJump()
 	
 	if (GetCharacterMovement()->IsFalling() && IsWallSliding)
 	{
+			/* Determine Wall Jump direction based on the direction the Character engaged the wall */
 			if (GetSprite()->GetForwardVector().X < 0)
 			{
 				OppositeFacingDirection = GetActorRotation().Yaw  ;
@@ -230,7 +213,7 @@ void AMainCharacter::WallSlide(float Value)
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
 
-	/* It's important to use ActorEyesViewpoint and not PlayerViewPoint as the character itself needs to find Interactable objects from its perspective */ 
+	/* It's important to use ActorEyesViewpoint and not PlayerViewPoint as the character itself needs to find Hit Actors from its perspective */ 
 	GetController()->GetActorEyesViewPoint(EyesLoc, EyesRot);
 
 	FVector TraceStart = EyesLoc + FVector(0.f, 0.f,-50.f);;
@@ -241,6 +224,7 @@ void AMainCharacter::WallSlide(float Value)
 	
 	if (GetWorld()->LineTraceSingleByChannel(WallSlideTraceHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
 	{
+		/* Contains("Lamp") required to prevent odd sliding glitch when Character overlaps the Lamp's Mesh Box */ 
 		if (WallSlideTraceHit.GetActor() && !WallSlideTraceHit.GetActor()->GetName().Contains("Lamp")
 			&& GetCharacterMovement()->IsFalling() && GetCharacterMovement()->Velocity.Z < 0 && Value != 0)
 		{
@@ -304,33 +288,31 @@ void AMainCharacter::PerformInteractionCheck()
 	FVector EyesLoc;
 	FRotator EyesRot;
 	FHitResult TraceHit;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
 
+	/* It's important to use ActorEyesViewpoint and not PlayerViewPoint as the character itself needs to find Interactable Objects from its perspective */ 
 	GetController()->GetActorEyesViewPoint(EyesLoc, EyesRot);
 
 	FVector TraceStart = EyesLoc + FVector(0.f, 0.f,-50.f);;
 	FVector TraceEnd = (EyesRot.Vector() * InteractionCheckDistance) + TraceStart;
-	
+
+	/* Determine the Interaction distance of the Character */
 	// DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red );
-
-	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(this);
-
-
+	
 	if (GetWorld()->LineTraceSingleByChannel(TraceHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
 	{
-		// UDebug::Print(WARNING, "Found Actor");
-		//Check if we hit an interactable object
 		if (TraceHit.GetActor())
 		{
+			/* Check if we hit an Actor with an Interactable Component attached */
 			if (UInteractionComponent* InteractionComponent = Cast<UInteractionComponent>(TraceHit.GetActor()->GetComponentByClass(UInteractionComponent::StaticClass())))
 			{
-				// UDebug::Print(WARNING, "Found an Interactable Actor");
-
 				float Distance = (TraceStart - TraceHit.ImpactPoint).Size();
+				
 				if (InteractionComponent != GetInteractable() && Distance <= InteractionComponent->InteractionDistance)
 				{
-					// GEngine->AddOnScreenDebugMessage(-5, 2, FColor::Red, TEXT("HIT THE OBJECT"));
-					// UE_LOG(LogTemp, Warning, TEXT("Found an interactable object!"));
+					/* Check if an Interactable Object has been collided with */ 
+					// UDebug::PrintToScreen(WARNING, "Hit an Interactable Object", 1 );
 
 					FoundNewInteractable(InteractionComponent);
 				}
@@ -345,18 +327,17 @@ void AMainCharacter::PerformInteractionCheck()
 	}
 
 	CouldntFindInteractable();
-
 }
 
 void AMainCharacter::CouldntFindInteractable()
 {
-	//We've lost focus on an interactable. Clear the timer.
+	/* Lost focus on an interactable so clear the timer. */
 	if (GetWorldTimerManager().IsTimerActive(TimerHandle_Interact))
 	{
 		GetWorldTimerManager().ClearTimer(TimerHandle_Interact);
 	}
 
-	//Tell the interactable we've stopped focusing on it, and clear the current interactable
+	/* Tell the interactable we've stopped focusing on it, and clear the current interactable */
 	if (UInteractionComponent* Interactable = GetInteractable())
 	{
 		Interactable->EndFocus(this);
@@ -372,8 +353,6 @@ void AMainCharacter::CouldntFindInteractable()
 
 void AMainCharacter::FoundNewInteractable(UInteractionComponent* Interactable)
 {
-	UE_LOG(LogTemp,Warning, TEXT("Found Interactable yeah!"));
-
 	EndInteract();
 
 	if (UInteractionComponent* OldInteractable = GetInteractable())
@@ -383,13 +362,10 @@ void AMainCharacter::FoundNewInteractable(UInteractionComponent* Interactable)
 
 	InteractionData.ViewedInteractionComponent = Interactable;
 	Interactable->BeginFocus(this);
-
 }
 
 void AMainCharacter::BeginInteract()
 {
-	// UDebug::Print(WARNING, "Interact");		
-
 	if (!HasAuthority())
 	{
 		ServerBeginInteract();
@@ -397,7 +373,7 @@ void AMainCharacter::BeginInteract()
 
 	/**As an optimization, the server only checks that we're looking at an item once we begin interacting with it.
 	This saves the server doing a check every tick for an interactable Item. The exception is a non-instant interact.
-	In this case, the server will check every tick for the duration of the interact*/
+	In this case, the server will check every tick for the duration of the interact */
 	if (HasAuthority())
 	{
 		PerformInteractionCheck();
@@ -408,7 +384,6 @@ void AMainCharacter::BeginInteract()
 	if (UInteractionComponent* Interactable = GetInteractable())
 	{
 		Interactable->BeginInteract(this);
-		// UDebug::Print(ERROR, "Begin Interact");
 
 		if (FMath::IsNearlyZero(Interactable->InteractionTime))
 		{
@@ -440,15 +415,14 @@ void AMainCharacter::EndInteract()
 
 void AMainCharacter::Interact()
 {
-	// GEngine->AddOnScreenDebugMessage(-5, 2, FColor::Red, TEXT("HIT THE OBJECT"));
-	UE_LOG(LogTemp, Warning, TEXT("Found an interactable object!"));
-
 	GetWorldTimerManager().ClearTimer(TimerHandle_Interact);
 
 	if (UInteractionComponent* Interactable = GetInteractable())
 	{
 		Interactable->Interact(this);
-		// GEngine->AddOnScreenDebugMessage(-5, 2, FColor::Red, TEXT("HIT THE OBJECT"));
+
+		/* Check an Interactable Object was found */
+		// UDebug::PrintToScreen(WARNING, "Found an Interactable Object!", 1.f );
 	}
 }
 

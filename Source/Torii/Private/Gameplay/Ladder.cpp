@@ -8,20 +8,16 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-// Sets default values
 ALadder::ALadder() :
 	LadderHeight()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	CollisionVolume = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionVolume"));
 	CollisionVolume->SetRelativeScale3D(FVector(16.f, 0.f, 48.f));
 	RootComponent = CollisionVolume;
-
 }
 
-// Called when the game starts or when spawned
 void ALadder::BeginPlay()
 {
 	Super::BeginPlay();
@@ -30,13 +26,6 @@ void ALadder::BeginPlay()
 	CollisionVolume->OnComponentEndOverlap.AddDynamic(this, &ALadder::OnOverlapEnd);
 	
 	Player = Cast<AMainCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
-}
-
-// Called every frame
-void ALadder::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 
 void ALadder::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
