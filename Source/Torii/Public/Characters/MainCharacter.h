@@ -65,7 +65,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Reference")
 	AMainPlayerController* PlayerController;
 	
-	bool WallSlideCheck;;
+	bool WallSlideCheck;
+	float DisengageSlidingTimer;
+	int WallJumpForce;;
 	int OppositeFacingDirection;
 
 	virtual void Tick(float DeltaSeconds) override;

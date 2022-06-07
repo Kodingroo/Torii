@@ -27,7 +27,10 @@ AMainCharacter::AMainCharacter() :
 	IsWallSliding(false),
 	OnLadder(false),
 	OverlapLamp(false),
-	WallSlideCheck(false)
+	WallSlideCheck(false),
+	DisengageSlidingTimer(0.6f),
+	WallJumpForce(-2),
+	OppositeFacingDirection(0)
 {
 	/* Use only Yaw from the controller and ignore the rest of the rotation. */
 	bUseControllerRotationPitch = false;
@@ -75,6 +78,9 @@ void AMainCharacter::BeginPlay()
 	/* Starting Scale values are assigned here for use with the Squish Animation effect */
 	StartWidth = GetSprite()->GetRelativeScale3D().X;
 	StartHeight = GetSprite()->GetRelativeScale3D().Z;
+
+	/* Establish References */
+	PlayerController = Cast<AMainPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)); 
 }
 
 void AMainCharacter::Tick(float DeltaSeconds)
@@ -106,24 +112,31 @@ void AMainCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInpu
 
 void AMainCharacter::MoveRight(float Value)
 {
+	/* Determine if the Character has engaged a Wall or not */
 	WallSlide(Value);
-	
+
+	/* Movement for all instances but Wall Jumping */
 	if( !GetCharacterMovement()->IsFalling() || !IsWallSliding )
 	{
 		WallSlideCheck = false; 
-		AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
+		RightInput(Value);
 	}
-	else if( IsWallSliding && WallSlideCheck == false)
+	/* Determine how long to disable Controller Input before disengaging from the Wall. This allows for leeway when a Player is trying to Wall Jump */
+	else if( IsWallSliding && WallSlideCheck == false )
 	{
+		/* Must prevent the Tick from resetting the Timer while sliding */
 		WallSlideCheck = true;
+		
 		GetWorld()->GetTimerManager().ClearTimer(WallSlidingHandle);
-		const float FacingValue = GetSprite()->GetForwardVector().X ? 1.f : -1.f;
+
+		/* Determine the Disengage Wall direction depending on the Direction when beginning to WallSide */
+		float FacingValue;
+		if (GetSprite()->GetForwardVector().X <= 0) { FacingValue = 1.f; } else { FacingValue = -1.f; }
+		
+		/* the FTimerDelegate is required for passing params */ 
 		const FTimerDelegate SlidingDelegate = FTimerDelegate::CreateUObject( this, &AMainCharacter::RightInput, FacingValue );
-		GetWorld()->GetTimerManager().SetTimer(WallSlidingHandle, SlidingDelegate, .6f, true);
-		// GetWorld()->GetTimerManager().SetTimer(WallSlidingHandle, [&]()
-		// {
-		// 	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), FacingValue);
-		// }, .7f, false);
+
+		GetWorld()->GetTimerManager().SetTimer(WallSlidingHandle, SlidingDelegate, DisengageSlidingTimer, true);
 	}
 }
 
@@ -143,6 +156,7 @@ void AMainCharacter::MoveForward(float Value)
 
 void AMainCharacter::OpenMenu()
 {
+	/* Loaded on both game start and when pause button pressed */
 	if (MainMenuWidget)
 	{
 		UUserWidget* MainMenu = Cast<UUserWidget>(CreateWidget(GetWorld(), MainMenuWidget));
@@ -150,7 +164,6 @@ void AMainCharacter::OpenMenu()
 		{
 			MainMenu->AddToViewport();
 
-			PlayerController = Cast<AMainPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)); 
 			PlayerController->bShowMouseCursor;
 		}
 	}
@@ -160,23 +173,25 @@ void AMainCharacter::OpenMenu()
 
 void AMainCharacter::DoubleJump()
 {
-	Squish(-.2, .2, .2);
+	const float JumpZ = GetCharacterMovement()->JumpZVelocity;
 
-	float JumpZ = GetCharacterMovement()->JumpZVelocity;
+	if (JumpCounter == 0)
+	{
+		/* Add squishy feel to the Character Animation on first Jump key press */
+		Squish(-.2, .2, .2);
+	}
 	
 	if (GetCharacterMovement()->IsFalling() && IsWallSliding)
 	{
-			const float AddedForce = -2;
-			OppositeFacingDirection = 0;
 			if (GetSprite()->GetForwardVector().X < 0)
 			{
 				OppositeFacingDirection = GetActorRotation().Yaw  ;
-				LaunchCharacter(FVector(OppositeFacingDirection * AddedForce, 0.f, JumpZ), true, true);
+				LaunchCharacter(FVector(OppositeFacingDirection * WallJumpForce, 0.f, JumpZ), true, true);
 			}
 			else if (GetSprite()->GetForwardVector().X > 0)
 			{
 				OppositeFacingDirection = GetActorRotation().Yaw + 180.f;
-				LaunchCharacter(FVector(OppositeFacingDirection * AddedForce, 0.f, JumpZ), true, true);
+				LaunchCharacter(FVector(OppositeFacingDirection * WallJumpForce, 0.f, JumpZ), true, true);
 			}
 			
 			IsWallSliding = false;
@@ -190,17 +205,16 @@ void AMainCharacter::DoubleJump()
 
 		UGameplayStatics::PlaySound2D(GetWorld(), JumpSoundCue);
 	}
-	if (MaximumJumps > 1)
-	{
-		
-	}
-	// UDebug::Print(WARNING, "Current Max Jumps: " + FString::FromInt(MaximumJumps));
+
+	/* Check Jump values are working as expected */
+	// UDebug::Print(WARNING, "Current Jump Counter : " + FString::FromInt(JumpCounter) + " / Current Max Jumps: " + FString::FromInt(MaximumJumps));
 }
 
 void AMainCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
-	
+
+	/* Add squishy feel to the Character Animation when Landing */
 	Squish(.3, -.3, 0.1);
 
 	/* Reset the ability to Jump and Dash when landed */
