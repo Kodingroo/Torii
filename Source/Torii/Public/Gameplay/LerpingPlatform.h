@@ -16,10 +16,6 @@ class TORII_API ALerpingPlatform : public AActor
 public:	
 	ALerpingPlatform();
 
-protected:
-	virtual void BeginPlay() override;
-
-public:	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sprite")
 	UPaperSpriteComponent* PaperSprite;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sprite")
@@ -27,4 +23,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Components")
 	void AttachLerpingComponent();
+	
+protected:
+	virtual void BeginPlay() override;
 };

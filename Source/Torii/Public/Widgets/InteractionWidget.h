@@ -17,13 +17,10 @@ class TORII_API UInteractionWidget : public UUserWidget
 public:
 
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
-		void UpdateInteractionWidget(class UInteractionComponent* InteractionComponent);
+	void UpdateInteractionWidget(class UInteractionComponent* InteractionComponent);
+	UPROPERTY(BlueprintReadOnly, Category = "Interaction", meta = (ExposeOnSpawn))
+	UInteractionComponent* OwningInteractionComponent;
 
 	UFUNCTION(BlueprintImplementableEvent)
-		void OnUpdateInteractionWidget();
-
-	UPROPERTY(BlueprintReadOnly, Category = "Interaction", meta = (ExposeOnSpawn))
-	class UInteractionComponent* OwningInteractionComponent;
-
-
+	void OnUpdateInteractionWidget();
 };

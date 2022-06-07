@@ -73,18 +73,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintAssignable)
 	FOnBeginInteract OnInteract;
 
-protected:
-	// Called when the game starts
-	virtual void Deactivate() override;
-
-	bool CanInteract(class AMainCharacter* Character) const;
-
-	//On the server, this will hold all interactors. On the local player, this will just hold the local player (provided they are an interactor)
-	UPROPERTY()
-	TArray<class AMainCharacter*> Interactors;
-
-public:
-
 	/***Refresh the interaction widget and its custom widgets.
 	An example of when we'd use this is when we take 3 items out of a stack of 10, and we need to update the widget
 	so it shows the stack as having 7 items left. */
@@ -104,5 +92,16 @@ public:
 	//On server this is the first interactors percentage, on client this is the local interactors percentage
 	UFUNCTION(BlueprintPure, Category = "Interaction")
 	float GetInteractPercentage();
+	
+protected:
+	// Called when the game starts
+	virtual void Deactivate() override;
+
+	bool CanInteract(class AMainCharacter* Character) const;
+
+	//On the server, this will hold all interactors. On the local player, this will just hold the local player (provided they are an interactor)
+	UPROPERTY()
+	TArray<class AMainCharacter*> Interactors;
+
 
 };

@@ -17,7 +17,14 @@ class TORII_API ATorii_HUD : public AHUD
 public:
 	ATorii_HUD();
 
+	void DisplayMenu();
+	void RemoveMenu();
+	void DisplayWinScreen();
+	void RemoveWinScreen();
+	
 protected:
+	virtual void BeginPlay();
+
 	TSharedPtr<class SK_MainMenuWidget> menuWidget;
 	TSharedPtr<SWidget> menuWidgetContainer;
 
@@ -26,12 +33,4 @@ protected:
 
 	TSharedPtr<class SK_YouWinWidget> YouWinWidget;
 	TSharedPtr<SWidget> YouWinWidgetContainer;
-	
-	virtual void BeginPlay();
-
-public:
-	void DisplayMenu();
-	void RemoveMenu();
-	void DisplayWinScreen();
-	void RemoveWinScreen();
 };

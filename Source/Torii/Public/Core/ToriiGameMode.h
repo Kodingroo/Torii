@@ -20,7 +20,7 @@ public:
 
 	virtual void StartPlay() override;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category="Load on Start")
 	void OpenMenu();
 
 	UFUNCTION(BlueprintCallable, Category="Initialize Level")
@@ -48,8 +48,7 @@ protected:
 	TSubclassOf<UUserWidget> CollectFeatherWidget;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Widgets")
 	UUserWidget* CFW;
-
-			
+	
 	UPROPERTY(EditAnywhere, Category="Widgets")
 	TSubclassOf<UUserWidget> DoubeJumpWidget;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Widgets")

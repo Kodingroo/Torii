@@ -19,7 +19,13 @@ class TORII_API AMainPlayerController : public APlayerController
 public:
 	AMainPlayerController();
 	
+	virtual void SetupInputComponent() override;
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Feather Properties")
+	int TotalFeathers;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Feather Properties")
+	int CollectedFeathers;
 
 	UFUNCTION(BlueprintCallable, Category="HUD")
 	void OpenMenu();
@@ -27,14 +33,6 @@ public:
 	void BindFeatherCollectedEvent();
 	UFUNCTION(BlueprintCallable, Category="Feathers")
 	void ObserveFeatherCollected(bool bCoinCollected);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Feather Properties")
-	int TotalFeathers;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Feather Properties")
-	int CollectedFeathers;
-
-
-	virtual void SetupInputComponent() override;
 	
 private:
 	UPROPERTY(EditAnywhere, Category="Widgets")

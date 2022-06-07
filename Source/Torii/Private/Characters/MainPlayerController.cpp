@@ -84,7 +84,7 @@ void AMainPlayerController::ObserveFeatherCollected(bool bFeatherCollected)
 
 		GameModeRef->DisplayDoubleJumpWidget();
 	}
-	else if (GameModeRef && CollectedFeathers != TotalFeathers)
+	else if (GameModeRef && CollectedFeathers == 1)
 	{
 		GameModeRef->DisplayCollectedFeathersWidget();
 	}

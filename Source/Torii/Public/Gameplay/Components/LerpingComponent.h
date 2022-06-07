@@ -15,12 +15,32 @@ class TORII_API ULerpingComponent : public USceneComponent
 public:	
 	ULerpingComponent();
 
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	/* Variables from Sin Function */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sin")
+	bool bShouldLoop;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sin");
+	float Amplitude;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sin");
+	float Period;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sin");
+	float PhaseShift;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sin");
+	float VerticalShift;
+	
+	/* Variables for True Lerp */ 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Lerp")
+	float LerpDuration;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Lerp")
+	float WaitTime;
+	
 protected:
 	virtual void BeginPlay() override;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category="Actor Reference")
-	AActor* Parent = nullptr;
+	AActor* Parent;
 	
 	/* Variables from Sin Function */
 	float RunningTime;
@@ -30,25 +50,4 @@ private:
 	float TimeElapsed = 0;
 	FVector StartLocation;
 	FVector TargetLocation;
-
-public:	
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-	/* Variables from Sin Function */
-	UPROPERTY(EditAnywhere, Category="Sin")
-	bool bShouldLoop;
-	UPROPERTY(EditAnywhere, Category="Sin");
-	float Amplitude;
-	UPROPERTY(EditAnywhere, Category="Sin");
-	float Period;
-	UPROPERTY(EditAnywhere, Category="Sin");
-	float PhaseShift;
-	UPROPERTY(EditAnywhere, Category="Sin");
-	float VerticalShift;
-	
-	/* Variables for True Lerp */ 
-	UPROPERTY(EditAnywhere, Category="Lerp")
-	float LerpDuration;
-	UPROPERTY(EditAnywhere, Category="Lerp")
-	float WaitTime;
 };

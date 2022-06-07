@@ -44,10 +44,9 @@ class AMainCharacter : public APaperCharacter
 public:
 	AMainCharacter();
 
-	UTextRenderComponent* TextComponent;
-	bool IsWallSliding;
-	float HitObjectDirection;
-	float WallSlideDirection;
+	virtual void Tick(float DeltaSeconds) override;
+	
+	// ---------- PROPERTIES ---------- //
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Audio")
 	USoundBase* JumpSoundCue;
@@ -67,72 +66,6 @@ public:
 	int WallJumpForce;;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wall Jump")
 	int OppositeFacingDirection;
-
-	virtual void Tick(float DeltaSeconds) override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room Camera")
-	AToriiCamera* CurrentCamera;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Squish")
-	float StartWidth;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Squish")
-	float StartHeight;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Squish")
-	bool IsMirrored;
-
-	/* Create squished animation quality for jumping */
-	void Squish(float ModWidth, float ModHeight, float SquishDuration );
-
-	FTimerHandle WallSlidingHandle;
-	FTimerHandle SquishHandle;
-
-	// ---------- INTERACTION ---------- //
-	//How often in seconds to check for an interactable object. Set this to zero if you want to check every tick.
-	UPROPERTY(EditDefaultsOnly, Category = "Interaction")
-	float InteractionCheckFrequency;
-
-	//How far we'll trace when we check if the player is looking at an interactable object
-	UPROPERTY(EditDefaultsOnly, Category = "Interaction")
-	float InteractionCheckDistance;
-
-	void WallSlide(float Value);
-	
-	void PerformInteractionCheck();
-
-	void CouldntFindInteractable();
-	void FoundNewInteractable(UInteractionComponent* Interactable);
-
-	void BeginInteract();
-	void EndInteract();
-
-	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerBeginInteract();
-
-	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerEndInteract();
-
-	void Interact();
-
-	UPROPERTY(EditAnywhere, Category="Widgets")
-	TSubclassOf<UUserWidget> MainMenuWidget;
-
-	//Information about the current state of the players interaction
-	UPROPERTY()
-	FInteractionData InteractionData;
-
-	//Helper function to make grabbing interactable faster
-	FORCEINLINE class UInteractionComponent* GetInteractable() const { return InteractionData.ViewedInteractionComponent; }
-
-	FTimerHandle TimerHandle_Interact;
-
-	//True if we're interacting with an item that has an interaction time (for example a lamp that takes 2 seconds to turn on)
-	bool IsInteracting() const;
-
-	//Get the time till we interact with the current interactable
-	float GetRemainingInteractTime() const;
-
-	// ---------- PROPERTIES ---------- //
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Jump")
 	int JumpCounter;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Jump")
@@ -145,64 +78,110 @@ public:
 	float DashDistance;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Climb")
 	mutable bool OnLadder;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room Camera")
+	UTextRenderComponent* TextComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room Camera")
+	bool IsWallSliding;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room Camera")
+	float HitObjectDirection;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room Camera")
+	float WallSlideDirection;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room Camera")
+	AToriiCamera* CurrentCamera;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Squish")
+	float StartWidth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Squish")
+	float StartHeight;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Squish")
+	bool IsMirrored;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Timers")
+	FTimerHandle WallSlidingHandle;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Timers")
+	FTimerHandle SquishHandle;
+	
+	// ---------- INTERACTION ---------- //
+	
+	//How often in seconds to check for an interactable object. Set this to zero if you want to check every tick.
+	UPROPERTY(EditDefaultsOnly, Category = "Interaction")
+	float InteractionCheckFrequency;
+	//How far we'll trace when we check if the player is looking at an interactable object
+	UPROPERTY(EditDefaultsOnly, Category = "Interaction")
+	float InteractionCheckDistance;
+	//True if we're interacting with an item that has an interaction time (for example a lamp that takes 2 seconds to turn on)
+	bool IsInteracting() const;
+	//Get the time till we interact with the current interactable
+	float GetRemainingInteractTime() const;
+	//Information about the current state of the players interaction
+	UPROPERTY()
+	FInteractionData InteractionData;
+	UPROPERTY()
+	FTimerHandle TimerHandle_Interact;
+	
+	UFUNCTION()
+	void PerformInteractionCheck();
+	UFUNCTION()
+	void CouldntFindInteractable();
+	UFUNCTION()
+	void FoundNewInteractable(UInteractionComponent* Interactable);
+	UFUNCTION()
+	void BeginInteract();
+	UFUNCTION()
+	void EndInteract();
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerBeginInteract();
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerEndInteract();
+	UFUNCTION()
+	void Interact();
+	
+	/* Helper function to make grabbing interactable faster */
+	FORCEINLINE class UInteractionComponent* GetInteractable() const { return InteractionData.ViewedInteractionComponent; }
 	
 protected:
 	virtual void BeginPlay() override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 	
-	// The animation to play while running around
+	// ---------- ANIMATIONS ---------- //
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Animations)
 	UPaperFlipbook* RunningAnimation;
-
-	// The animation to play while idle (standing still)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
 	UPaperFlipbook* IdleAnimation;
-	
-	// The animation to play while jupmoing
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
 	UPaperFlipbook* JumpingAnimation;
-	
-	// The animation to play while landing
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
 	UPaperFlipbook* LandingAnimation;
-		
-	// The animation to play while hit
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
 	UPaperFlipbook* HitAnimation;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
 	UPaperFlipbook* WingsAnimation;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
 	UPaperFlipbook* SlidingAnimation;
-	
 
-	/** Called to choose the correct animation to play based on the character's movement state */
-	void UpdateAnimation();
-
-	/** Called for side to side input */
-	void MoveRight(float Value);
+	// ---------- FUNCTIONS ---------- //
 
 	UFUNCTION()
-	void RightInput(float Value);
-
-	/** Called for up/down ladder input */
-	void MoveForward(float Value);
-
+	void WallSlide(float Value);
+	/** Called to choose the correct animation to play based on the character's movement state */
+	void UpdateAnimation();
+	UFUNCTION()
 	void UpdateCharacter();
-
-	/** Handle touch inputs. */
-	void TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location);
-
-	/** Handle touch stop event. */
-	void TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location);
-
-	// APawn interface
-	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
-	// End of APawn interface
-
+	/** Evaluate with direction the player is facing and whether they are Wall Sliding, which requires an input delay */
+	UFUNCTION()
+	void MoveRight(float Value);
+	/* Apply side to side input */ 
+	UFUNCTION()
+	void RightInput(float Value);
+	/* Called for up/down ladder input */
+	UFUNCTION()
+	void MoveForward(float Value);
+	/* Also called when Maximum Jump is still set to 1 */
+	UFUNCTION()
 	void DoubleJump();
-
+	/* Create squished animation quality for jumping and landing */
+	UFUNCTION()
+	void Squish(float ModWidth, float ModHeight, float SquishDuration );
+	
 	virtual void Landed(const FHitResult& Hit) override;
-
 };
 

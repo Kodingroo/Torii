@@ -14,21 +14,17 @@ class TORII_API AItem : public AActor
 	
 public:	
 	AItem();
-
-protected:
-	virtual void BeginPlay() override;
-
-public:	
-	/** Overlapping Box */
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Item | Collision")
 	UBoxComponent* CollisionVolume;
-
-	/** Base Mesh Component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Item | Mesh")
 	UStaticMeshComponent* Mesh;
 	
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category="Overlap Events")
 	virtual void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category="Overlap Events")
 	virtual void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+protected:
+	virtual void BeginPlay() override;
 };

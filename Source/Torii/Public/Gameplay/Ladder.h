@@ -16,21 +16,19 @@ class TORII_API ALadder : public AActor
 public:	
 	ALadder();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Item | Ladder")
 	float LadderHeight;
-
-protected:
-	virtual void BeginPlay() override;
-
-	UPROPERTY()
-	AMainCharacter* Player;
-
-public:	
-	/** Overlapping Box */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Item | Collision")
 	UBoxComponent* CollisionVolume;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category="Overlap Events")
 	virtual void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category="Overlap Events")
 	virtual void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+protected:
+	virtual void BeginPlay() override;
+	
+	UPROPERTY()
+	AMainCharacter* Player;
 };
