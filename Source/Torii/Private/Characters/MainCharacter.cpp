@@ -17,7 +17,7 @@
 
 AMainCharacter::AMainCharacter() :
 	JumpCounter(0),
-	MaximumJumps(1),
+	MaximumJumps(2),
 	JumpHeight(750.f),
 	DashCounter(0),
 	DashDistance(2000.f),
@@ -98,7 +98,7 @@ void AMainCharacter::Tick(float DeltaSeconds)
 		PerformInteractionCheck();
 	}
 
-	/* Because the Wings Animation was added separately from character animations, Relative position must be Ticked and Set Visibility on Double jump must be set */ 
+	/* Because the Wings Animation was added separately from character animations, Relative position must be Ticked */ 
 	WingsAnimationCheck();
 }
 
@@ -197,6 +197,10 @@ void AMainCharacter::DoubleJump()
 		JumpCounter++;
 
 		UGameplayStatics::PlaySound2D(GetWorld(), JumpSoundCue);
+	}
+	if (JumpCounter > 1)
+	{
+		WingsComponent->SetVisibility(true);
 	}
 
 	/* Check Jump values are working as expected */
@@ -511,8 +515,5 @@ void AMainCharacter::WingsAnimationCheck()
 		WingsComponent->SetRelativeLocation(GetActorLocation() + FVector(-4.f, -20.f, 10.f));
 	}
 
-	if (JumpCounter > 1)
-	{
-		WingsComponent->SetVisibility(true);
-	}
+	/* Set Visibility set true in DoubleJump() and False in WallSlide() */
 }
