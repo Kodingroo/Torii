@@ -17,7 +17,7 @@
 
 AMainCharacter::AMainCharacter() :
 	JumpCounter(0),
-	MaximumJumps(2),
+	MaximumJumps(1),
 	JumpHeight(750.f),
 	DashCounter(0),
 	DashDistance(2000.f),
@@ -508,11 +508,11 @@ void AMainCharacter::WingsAnimationCheck()
 {
 	if (GetActorForwardVector().X < 0 )
 	{
-		WingsComponent->SetRelativeLocation(GetActorLocation() + FVector(4.f, -20.f, 10.f));
+		WingsComponent->SetRelativeLocation(GetActorLocation() + FVector(4.f, -0.1f, 10.f));
 	}
 	else
 	{
-		WingsComponent->SetRelativeLocation(GetActorLocation() + FVector(-4.f, -20.f, 10.f));
+		WingsComponent->SetRelativeLocation(GetActorLocation() + FVector(-4.f, -0.1f, 10.f));
 	}
 
 	/* Set Visibility set true in DoubleJump() and False in WallSlide() and Landed() */
