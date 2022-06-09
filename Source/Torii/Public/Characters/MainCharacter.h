@@ -44,6 +44,8 @@ class AMainCharacter : public APaperCharacter
 public:
 	AMainCharacter();
 
+	void WingsAnimationCheck();
+	
 	virtual void Tick(float DeltaSeconds) override;
 	
 	// ---------- PROPERTIES ---------- //
@@ -63,7 +65,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wall Slide")
 	float DisengageSlidingTimer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wall Jump")
-	int WallJumpForce;;
+	int WallJumpForce;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wall Jump")
 	int OppositeFacingDirection;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Jump")
@@ -98,6 +100,8 @@ public:
 	FTimerHandle WallSlidingHandle;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Timers")
 	FTimerHandle SquishHandle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Component | Wings")
+	UPaperFlipbookComponent* WingsComponent;;
 	
 	// ---------- INTERACTION ---------- //
 	

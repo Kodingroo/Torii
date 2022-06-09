@@ -66,7 +66,8 @@ AMainCharacter::AMainCharacter() :
 	/* Set how often and at what distance the Player Character should check for Scene objects with Interactive Components attached */ 
 	InteractionCheckFrequency = 0.f;
 	InteractionCheckDistance = 20.f;
-	
+
+	WingsComponent = CreateDefaultSubobject<UPaperFlipbookComponent>(TEXT("Wings"));
 }
 
 void AMainCharacter::BeginPlay()
@@ -76,6 +77,10 @@ void AMainCharacter::BeginPlay()
 	/* Starting Scale values are assigned here for use with the Squish Animation effect */
 	StartWidth = GetSprite()->GetRelativeScale3D().X;
 	StartHeight = GetSprite()->GetRelativeScale3D().Z;
+
+	WingsComponent->SetFlipbook(WingsAnimation);
+	WingsComponent->SetLooping(true);
+	WingsComponent->SetVisibility(true);
 
 	/* Establish References */
 	PlayerController = Cast<AMainPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)); 
@@ -92,6 +97,9 @@ void AMainCharacter::Tick(float DeltaSeconds)
 	{
 		PerformInteractionCheck();
 	}
+
+	/* Because the Wings Animation was added separately from character animations, Relative position must be Ticked and Set Visibility on Double jump must be set */ 
+	WingsAnimationCheck();
 }
 
 // -------------------- INPUT -------------------- //
@@ -157,6 +165,8 @@ void AMainCharacter::DoubleJump()
 {
 	const float JumpZ = GetCharacterMovement()->JumpZVelocity;
 
+	WingsComponent->SetVisibility(false);
+
 	if (JumpCounter == 0)
 	{
 		/* Add squishy feel to the Character Animation on first Jump key press */
@@ -197,6 +207,8 @@ void AMainCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 
+	WingsComponent->SetVisibility(false);
+
 	/* Add squishy feel to the Character Animation when Landing */
 	Squish(.3, -.3, 0.1);
 
@@ -228,6 +240,8 @@ void AMainCharacter::WallSlide(float Value)
 		if (WallSlideTraceHit.GetActor() && !WallSlideTraceHit.GetActor()->GetName().Contains("Lamp")
 			&& GetCharacterMovement()->IsFalling() && GetCharacterMovement()->Velocity.Z < 0 && Value != 0)
 		{
+			WingsComponent->SetVisibility(false);
+			
 			IsWallSliding = true;
 
 			WallSlideDirection = WallSlideTraceHit.GetActor()->GetActorRotation().Yaw;
@@ -484,5 +498,21 @@ void AMainCharacter::UpdateAnimation()
 	{
 		GetSprite()->SetFlipbook(SlidingAnimation);
 	}
-	
+}
+
+void AMainCharacter::WingsAnimationCheck()
+{
+	if (GetActorForwardVector().X < 0 )
+	{
+		WingsComponent->SetRelativeLocation(GetActorLocation() + FVector(4.f, -20.f, 10.f));
+	}
+	else
+	{
+		WingsComponent->SetRelativeLocation(GetActorLocation() + FVector(-4.f, -20.f, 10.f));
+	}
+
+	if (JumpCounter > 1)
+	{
+		WingsComponent->SetVisibility(true);
+	}
 }
