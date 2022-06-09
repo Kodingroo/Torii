@@ -61,7 +61,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Reference")
 	AMainPlayerController* PlayerController;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wall Slide")
-	bool WallSlideCheck;
+	bool WallDisengageRequestCheck;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wall Slide")
 	float DisengageSlidingTimer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wall Jump")
@@ -86,8 +86,6 @@ public:
 	bool IsWallSliding;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room Camera")
 	float HitObjectDirection;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room Camera")
-	float WallSlideDirection;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Room Camera")
 	AToriiCamera* CurrentCamera;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Squish")
@@ -173,9 +171,6 @@ protected:
 	/** Evaluate with direction the player is facing and whether they are Wall Sliding, which requires an input delay */
 	UFUNCTION()
 	void MoveRight(float Value);
-	/* Apply side to side input */ 
-	UFUNCTION()
-	void RightInput(float Value);
 	/* Called for up/down ladder input */
 	UFUNCTION()
 	void MoveForward(float Value);

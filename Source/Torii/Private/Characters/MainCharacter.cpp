@@ -25,7 +25,7 @@ AMainCharacter::AMainCharacter() :
 	IsWallSliding(false),
 	OnLadder(false),
 	OverlapLamp(false),
-	WallSlideCheck(false),
+	WallDisengageRequestCheck(false),
 	DisengageSlidingTimer(0.6f),
 	WallJumpForce(-2),
 	OppositeFacingDirection(0)
@@ -67,6 +67,7 @@ AMainCharacter::AMainCharacter() :
 	InteractionCheckFrequency = 0.f;
 	InteractionCheckDistance = 20.f;
 
+	/* The Wings Animation was created as a separate animation to apply to the Character Animation */ 
 	WingsComponent = CreateDefaultSubobject<UPaperFlipbookComponent>(TEXT("Wings"));
 }
 
@@ -120,34 +121,34 @@ void AMainCharacter::MoveRight(float Value)
 	/* Determine if the Character has engaged a Wall or not */
 	WallSlide(Value);
 
+	/* Used to compare with the Player Input to see if they wish to move in the opposite direction from which the Character engaged the Wall  */
+	float CharacterFacingValue;
+	if (GetSprite()->GetForwardVector().X <= 0) { CharacterFacingValue = -1.f; } else { CharacterFacingValue = 1.f; }
+
 	/* Movement for all instances but Wall Jumping */
 	if( !GetCharacterMovement()->IsFalling() || !IsWallSliding )
 	{
-		WallSlideCheck = false; 
-		RightInput(Value);
+		WallDisengageRequestCheck = false; 
+		AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
 	}
 	/* Determine how long to disable Controller Input before disengaging from the Wall. This allows for leeway when a Player is trying to Wall Jump */
-	else if( IsWallSliding && WallSlideCheck == false )
+	else if( IsWallSliding && WallDisengageRequestCheck == false && Value != CharacterFacingValue )
 	{
 		/* Must prevent the Tick from resetting the Timer while sliding */
-		WallSlideCheck = true;
+		WallDisengageRequestCheck = true;
 		
 		GetWorld()->GetTimerManager().ClearTimer(WallSlidingHandle);
+		GetWorld()->GetTimerManager().SetTimer(WallSlidingHandle, [&]()
+		{
+			/* A -1.f/ 1.f value must be applied to AddMovementInput otherwise the Character does not move away from the wall */
+			float DetachWallValue;
+			if (GetActorForwardVector().X > 0 ) { DetachWallValue = -1.f; } else { DetachWallValue = 1.f; }
+			AddMovementInput(FVector(1.0f, 0.0f, 0.0f), DetachWallValue);
 
-		/* Determine the Disengage Wall direction depending on the Direction when beginning to WallSide */
-		float FacingValue;
-		if (GetSprite()->GetForwardVector().X <= 0) { FacingValue = 1.f; } else { FacingValue = -1.f; }
-		
-		/* the FTimerDelegate is required for passing params */ 
-		const FTimerDelegate SlidingDelegate = FTimerDelegate::CreateUObject( this, &AMainCharacter::RightInput, FacingValue );
-
-		GetWorld()->GetTimerManager().SetTimer(WallSlidingHandle, SlidingDelegate, DisengageSlidingTimer, true);
+			/* Ensure delay is being called when the Player is pushing away from the wall */ 
+			// UDebug::PrintToScreen(WARNING, "Calling Delay", 1.f);
+		}, DisengageSlidingTimer, false);	
 	}
-}
-
-void AMainCharacter::RightInput(float Value)
-{
-	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
 }
 
 void AMainCharacter::MoveForward(float Value)
@@ -198,6 +199,7 @@ void AMainCharacter::DoubleJump()
 
 		UGameplayStatics::PlaySound2D(GetWorld(), JumpSoundCue);
 	}
+	
 	if (JumpCounter > 1)
 	{
 		WingsComponent->SetVisibility(true);
@@ -247,9 +249,7 @@ void AMainCharacter::WallSlide(float Value)
 			WingsComponent->SetVisibility(false);
 			
 			IsWallSliding = true;
-
-			WallSlideDirection = WallSlideTraceHit.GetActor()->GetActorRotation().Yaw;
-				
+			
 			GetCharacterMovement()->Velocity = FVector(0.f,0.f,-100.f);
 		}
 	}
@@ -515,5 +515,5 @@ void AMainCharacter::WingsAnimationCheck()
 		WingsComponent->SetRelativeLocation(GetActorLocation() + FVector(-4.f, -20.f, 10.f));
 	}
 
-	/* Set Visibility set true in DoubleJump() and False in WallSlide() */
+	/* Set Visibility set true in DoubleJump() and False in WallSlide() and Landed() */
 }
